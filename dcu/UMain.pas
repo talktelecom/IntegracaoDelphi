@@ -31,9 +31,16 @@ end;
 
 procedure TFormMain.Logar(ramal : Integer; senha : String);
 var
+  ret : Bool;
   _atendimento : Atendimento;
 begin
   _atendimento := Atendimento.Create;
+
+  ret := _atendimento.Inicia;
+  if (ret = false)  then begin
+    { TODO : Logar erro }
+    exit;
+  end;
 
   { Inicializar métodos e eventos }
 

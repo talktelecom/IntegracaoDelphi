@@ -19,7 +19,7 @@ end;
 const
 
 { Versão deste projeto }
-VERSAO  = '2.0.0';
+VERSAO  = '2.0.1';
 
 TAM_IP_ORIGEM = 80;
 TAM_DEPARTAMENTO = 80;
