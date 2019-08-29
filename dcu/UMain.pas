@@ -13,6 +13,10 @@ type
   private
     _thLogar: ThLogar;
     procedure Logar(ramal : Integer; senha : String);
+
+    { Métodos de callback }
+    procedure OnTempoStatus(Tempo: Integer);
+    
   public
     { Public declarations }
   end;
@@ -31,21 +35,20 @@ end;
 
 procedure TFormMain.Logar(ramal : Integer; senha : String);
 var
-  ret : Bool;
   _atendimento : Atendimento;
 begin
   _atendimento := Atendimento.Create;
 
-  ret := _atendimento.Inicia;
-  if (ret = false)  then begin
-    { TODO : Logar erro }
-    exit;
-  end;
-
   { Inicializar métodos e eventos }
+  _atendimento.OnTempoStatus := OnTempoStatus;
 
-
+  { Realiza o logon através de thread }
   _thLogar := ThLogar.Create (false, ramal, senha, _atendimento, Self);
+end;
+
+procedure TFormMain.OnTempoStatus(Tempo: Integer);
+begin
+  ShowMessage('Tempo no status - ' + IntToStr(Tempo));
 end;
 
 end.

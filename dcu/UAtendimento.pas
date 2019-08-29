@@ -20,8 +20,8 @@ uses Windows, SysUtils, UGlobalAtendimento, Dialogs;
   .
 }
 
-type PLogarInt = procedure (st: Pointer); {$IFDEF WIN32} stdcall; {$ENDIF}
-var LogarInt: PLogarInt;
+type TLogarInt = procedure (st: Pointer); {$IFDEF WIN32} stdcall; {$ENDIF}
+var LogarInt: TLogarInt;
 
 {
   Métodos de CallBack
@@ -39,13 +39,27 @@ var LogarInt: PLogarInt;
   .
 }
 
-// assinatura TempoStatus
-type PEvtTempoStatus = procedure(Tempo: Integer) of object;
-var OnTempoStatus: PEvtTempoStatus;
+type TOnTempoStatus = procedure(Tempo: Integer) of object;
 
-// método de callback TempoStatus
-type PEvtTempoStatusCallback = procedure(Tempo: Integer); cdecl;
-var SetFuncSetOnTempoStatusInt: function(onTempoStatus: PEvtTempoStatusCallback): Integer; cdecl;
+{
+  Métodos para registrar
+  os métodos de callback
+  na dll
+
+  - SetOnLogado
+  - SetOnDeslogado
+  - SetOnInfoIntervaloRamal
+  - SetOnTempoStatus
+  - SetOnChamada
+  - SetOnAtendido
+  - SetOnDesliga
+  .
+  .
+  .
+}
+
+// método set callback TempoStatus Wrapper dll
+var SetOnTempoStatus: procedure (onTempoStatus: TOnTempoStatus); cdecl;
 
 {
   Classe Atendimento
@@ -62,6 +76,9 @@ type
 
     public
 
+      { Eventos de callback }
+      OnTempoStatus: TOnTempoStatus;
+
       { Inicialização }
       constructor Create; overload;
       function Inicia : Bool;
@@ -77,18 +94,6 @@ type
 implementation
 
 {
-  -------------------------------------
-  Implementação dos métodos de callback
-  -------------------------------------
-}
-
-procedure OnTempoStatusInt(Tempo: Integer); cdecl;
-begin
-  if Assigned(OnTempoStatus) then
-    OnTempoStatus(Tempo);
-end;
-
-{
   -----------------------------------
   Implementação da Classe Atendimento
   -----------------------------------
@@ -101,6 +106,8 @@ constructor Atendimento.Create;
 begin
   // Execute the parent (TObject) constructor first
   inherited;  // Call the parent Create method
+  HInstDll := 0;
+  OnTempoStatus := nil;
 end;
 
 {
@@ -125,10 +132,11 @@ begin
   // para se comunicar com esta instância
 
   // SetOnTempoStatus
-  @SetFuncSetOnTempoStatusInt := GetProcAddress(HInstDll, 'SetOnTempoStatus');
-  if Assigned(SetFuncSetOnTempoStatusInt) then
+  @SetOnTempoStatus := GetProcAddress(HInstDll, 'SetOnTempoStatus');
+  if Assigned(SetOnTempoStatus) and
+      Assigned(OnTempoStatus) then
   begin
-    SetFuncSetOnTempoStatusInt(@OnTempoStatusInt);
+    SetOnTempoStatus(OnTempoStatus);
   end;
 
   // Carrega todos os métodos
@@ -157,16 +165,26 @@ end;
 }
 procedure Atendimento.Logar(ramal: Integer; senha: String);
 var
+  ret : Boolean;
   stL : StLogar;
   _senha : array [0..80] of char;
   _servidor : array [0..80] of char;
 begin
+
+  // Inicia a classe atendimento
+  ret := Inicia;
+  if (ret = false)  then begin
+    { TODO : Logar erro }
+    exit;
+  end;
+
   if Assigned(@LogarInt) then begin
     ZeroMemory(@stL,SizeOf(StLogar));
     stL.Id := 0;
     stL.Porta := 44900;
     stL.IntervaloCustomizado := 1;
     stL.Ramal := ramal;
+    stL.RamalVirtual := ramal;
     StrPCopy(_senha, senha);
     stL.Senha := @_senha;
     StrPCopy(_servidor, IP_SERVIDOR);
