@@ -2,7 +2,11 @@ unit UAtendimento;
 
 interface
 
-uses Windows, SysUtils, UGlobalAtendimento, Dialogs;
+uses  Windows,
+      SysUtils,
+      UGlobalAtendimento,
+      Dialogs,
+      Classes;
 
 {
   Métodos da Dll
@@ -20,26 +24,18 @@ uses Windows, SysUtils, UGlobalAtendimento, Dialogs;
   .
 }
 
-type TLogarInt = procedure (st: Pointer); {$IFDEF WIN32} stdcall; {$ENDIF}
-var LogarInt: TLogarInt;
+// Logar
+procedure LogarInt (st: Pointer); stdcall;
+procedure LogarInt; external 'EpbxIntegracao.dll' name 'Logar';
 
 {
-  Métodos de CallBack
-
-  Aqui temos a declaração das
-  funções de callbac e sua tipagem
-
-  - OnLogado
-  - OnDeslogarRetorno
-  - OnIntervalo
-  - OnChamada
-  - OnAtendido
-  .
-  .
-  .
+  Assinatura dos Métodos de CallBack
 }
 
-type TOnTempoStatus = procedure(Tempo: Integer) of object;
+type
+
+TOnEvent        = procedure() stdcall;
+TOnEventPointer = procedure(param: Pointer) stdcall;
 
 {
   Métodos para registrar
@@ -58,38 +54,56 @@ type TOnTempoStatus = procedure(Tempo: Integer) of object;
   .
 }
 
-// método set callback TempoStatus Wrapper dll
-var SetOnTempoStatus: procedure (onTempoStatus: TOnTempoStatus); cdecl;
+// método set callback Wrapper dll
+TSetOnEvent         = procedure () cdecl;
+TSetOnEventPointer  = procedure (_proc: TOnEventPointer) cdecl;
+
+// TSetOnLogado
 
 {
   Classe Atendimento
 
   Integração do CRM e a DLL
 }
-type
-  Atendimento = class
-    private
-      { Propriedades }
-      HInstDll : THandle;
+Atendimento = class
 
-      { procedure e function }
+  private
+    { Propriedades }
+    HInstDll : THandle;
 
-    public
+    { procedure e function }
 
-      { Eventos de callback }
-      OnTempoStatus: TOnTempoStatus;
+  public
+    { Eventos de callback Inicio }
 
-      { Inicialização }
-      constructor Create; overload;
-      function Inicia : Bool;
-      procedure Finaliza;
+    OnRingVirtual         : TOnEvent;
+    OnLogado              : TOnEventPointer;
+    OnDeslogado           : TOnEventPointer;
+    OnInfoIntervaloRamal  : TOnEventPointer;
+    OnSetIntervaloRamal   : TOnEventPointer;
+    OnTempoStatus         : TOnEventPointer;
+    OnInfoCliente         : TOnEventPointer;
+    OnChamada             : TOnEventPointer;
+    OnAtendido            : TOnEventPointer;
+    OnPathNomeDialogo     : TOnEventPointer;
+    OnChamadaPerdida      : TOnEventPointer;
+    OnDesliga             : TOnEventPointer;
 
-      { Eventos de callback }
+    { Eventos de callback Fim }
 
-      { Métodos para integraçào com a DLL }
-      procedure Logar(ramal: Integer; senha: String);
+    destructor Destroy; override;
 
-  end;
+  published
+    { Inicialização }
+    constructor Create;
+
+    function Inicia : Bool;
+    procedure Finaliza;
+
+    { Métodos para integraçào com a DLL }
+    procedure Logar(ramal: Integer; senha: String);
+
+end;
 
 implementation
 
@@ -104,10 +118,30 @@ implementation
 }
 constructor Atendimento.Create;
 begin
-  // Execute the parent (TObject) constructor first
-  inherited;  // Call the parent Create method
-  HInstDll := 0;
-  OnTempoStatus := nil;
+  inherited;
+  HInstDll              := 0;
+
+  OnRingVirtual         := nil;
+  OnLogado              := nil;
+  OnDeslogado           := nil;
+  OnInfoIntervaloRamal  := nil;
+  OnSetIntervaloRamal   := nil;
+  OnTempoStatus         := nil;
+  OnInfoCliente         := nil;
+  OnChamada             := nil;
+  OnAtendido            := nil;
+  OnPathNomeDialogo     := nil;
+  OnChamadaPerdida      := nil;
+  OnDesliga             := nil;
+
+  ShowMessage('Novo atendimento!');
+end;
+
+destructor Atendimento.Destroy;
+begin
+  Finaliza;
+  ShowMessage('Destroy atendimento!');
+  inherited;
 end;
 
 {
@@ -117,6 +151,9 @@ end;
   Seta os eventos de callback
 }
 function Atendimento.Inicia;
+var
+  SetOnLogado       : TSetOnEventPointer;
+  SetOnTempoStatus  : TSetOnEventPointer;
 begin
   Result := true;
 
@@ -130,25 +167,13 @@ begin
 
   // Seta os eventos da DLL
   // para se comunicar com esta instância
+  SetOnLogado := GetProcAddress(HInstDll, 'SetOnLogado');
+  if Assigned(SetOnLogado) and Assigned(OnLogado) then SetOnLogado(@OnLogado);
 
   // SetOnTempoStatus
-  @SetOnTempoStatus := GetProcAddress(HInstDll, 'SetOnTempoStatus');
-  if Assigned(SetOnTempoStatus) and
-      Assigned(OnTempoStatus) then
-  begin
-    SetOnTempoStatus(OnTempoStatus);
-  end;
+  SetOnTempoStatus := GetProcAddress(HInstDll, 'SetOnTempoStatus');
+  if Assigned(SetOnTempoStatus) and Assigned(OnTempoStatus) then SetOnTempoStatus(@OnTempoStatus);
 
-  // Carrega todos os métodos
-  // utilizados aqui
-
-  // Logar
-  LogarInt := GetProcAddress(HInstDll, 'Logar');
-  if Assigned(@LogarInt) = false then begin
-    { TODO : Logar erro }
-    Result := false;
-    exit;
-  end;
 end;
 
 {
@@ -165,9 +190,9 @@ end;
 }
 procedure Atendimento.Logar(ramal: Integer; senha: String);
 var
-  ret : Boolean;
-  stL : StLogar;
-  _senha : array [0..80] of char;
+  ret       : Boolean;
+  stL       : StLogar;
+  _senha    : array [0..80] of char;
   _servidor : array [0..80] of char;
 begin
 
@@ -198,4 +223,5 @@ begin
 end;
 
 end.
+
 
