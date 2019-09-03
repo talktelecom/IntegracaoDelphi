@@ -54,6 +54,11 @@ StLogado = record
 
 end;
 
+CLogado = class
+
+
+end;
+
 
 { Constantes }
 const

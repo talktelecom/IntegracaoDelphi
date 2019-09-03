@@ -54,13 +54,17 @@ implementation
 }
 
 procedure OnLogado(param: Pointer); stdcall;
-//var
-  //st      : PStLogado;
-  //status  : Integer;
+var
+  st      : StLogado;
+  status  : Integer;
+  len     : Integer;
 begin
-  //st := PStLogado(param);
-  //status := st.Status;
-    FormMain.lblLogado.Caption := 'Logadooooo';
+  ShowMessage('len'+IntToStr(sizeof(StLogado)));
+
+
+
+  CopyMemory(@st, param, sizeof(StLogado));
+  FormMain.lblLogado.Caption := 'Nome do usuario : ' + st.NomeUsuario;
 end;
 
 procedure OnTempoStatus(param: Pointer); stdcall;
