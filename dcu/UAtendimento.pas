@@ -168,11 +168,15 @@ begin
   // Seta os eventos da DLL
   // para se comunicar com esta instância
   SetOnLogado := GetProcAddress(HInstDll, 'SetOnLogado');
-  if Assigned(SetOnLogado) and Assigned(OnLogado) then SetOnLogado(@OnLogado);
+  if Assigned(SetOnLogado) and
+    Assigned(OnLogado) then
+      SetOnLogado(@OnLogado);
 
   // SetOnTempoStatus
   SetOnTempoStatus := GetProcAddress(HInstDll, 'SetOnTempoStatus');
-  if Assigned(SetOnTempoStatus) and Assigned(OnTempoStatus) then SetOnTempoStatus(@OnTempoStatus);
+  if Assigned(SetOnTempoStatus) and
+    Assigned(OnTempoStatus) then
+      SetOnTempoStatus(@OnTempoStatus);
 
 end;
 

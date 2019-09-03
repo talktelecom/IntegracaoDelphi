@@ -1,6 +1,6 @@
 object FormMain: TFormMain
-  Left = 1095
-  Top = 662
+  Left = 621
+  Top = 885
   Width = 517
   Height = 265
   Caption = 'Atendimento'
@@ -20,6 +20,13 @@ object FormMain: TFormMain
     Width = 29
     Height = 13
     Caption = 'tempo'
+  end
+  object lblLogado: TLabel
+    Left = 24
+    Top = 104
+    Width = 36
+    Height = 13
+    Caption = 'Logado'
   end
   object btnLogar: TButton
     Left = 32

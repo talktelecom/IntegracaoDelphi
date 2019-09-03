@@ -11,13 +11,15 @@ uses
   UThLogar,
   UAtendimento,
   Dialogs,
-  SysUtils;
+  SysUtils,
+  UGlobalAtendimento;
 
 type
 
 TFormMain = class(TForm)
   btnLogar: TButton;
   lblTempo: TLabel;
+    lblLogado: TLabel;
   procedure btnLogarClick(Sender: TObject);
   procedure FormClose(Sender: TObject; var Action: TCloseAction);
 private
@@ -51,6 +53,16 @@ implementation
   .
 }
 
+procedure OnLogado(param: Pointer); stdcall;
+//var
+  //st      : PStLogado;
+  //status  : Integer;
+begin
+  //st := PStLogado(param);
+  //status := st.Status;
+    FormMain.lblLogado.Caption := 'Logadooooo';
+end;
+
 procedure OnTempoStatus(param: Pointer); stdcall;
 var
   t : Integer;
@@ -73,6 +85,8 @@ end;
 procedure TFormMain.Logar(ramal : Integer; senha : String);
 begin
   // Liberamos instancia anterior
+  // Lembre-se na DLL temos que
+  // Criar sempre uma nova instancia!!!
   if Assigned(_atendimento)then
     _atendimento.Destroy;
 
@@ -80,7 +94,7 @@ begin
   _atendimento := Atendimento.Create;
 
   { Inicializar métodos e eventos }
-  //_atendimento.OnLogado := @OnLogado;
+  _atendimento.OnLogado := @OnLogado;
   _atendimento.OnTempoStatus := @OnTempoStatus;
 
   { Realiza o logon através de thread }
