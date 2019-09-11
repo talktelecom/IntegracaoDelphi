@@ -2,8 +2,13 @@ unit UThLogar;
 
 interface
 
-uses Windows, Forms, Dialogs, SysUtils, Classes, UGlobalAtendimento, UAtendimento;
-
+uses  Windows,
+      Forms,
+      Dialogs,
+      SysUtils,
+      Classes,
+      UGlobalAtendimento,
+      UAtendimento;
 type
   ThLogar = class(TThread)
     private

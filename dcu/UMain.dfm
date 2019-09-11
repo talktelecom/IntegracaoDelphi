@@ -1,6 +1,6 @@
 object FormMain: TFormMain
-  Left = 621
-  Top = 885
+  Left = 1264
+  Top = 527
   Width = 517
   Height = 265
   Caption = 'Atendimento'
@@ -14,19 +14,26 @@ object FormMain: TFormMain
   OnClose = FormClose
   PixelsPerInch = 96
   TextHeight = 13
-  object lblTempo: TLabel
+  object lblIntervalo: TLabel
     Left = 32
-    Top = 80
-    Width = 29
+    Top = 72
+    Width = 44
     Height = 13
-    Caption = 'tempo'
+    Caption = 'Intervalo:'
   end
-  object lblLogado: TLabel
-    Left = 24
-    Top = 104
-    Width = 36
+  object lblChamada: TLabel
+    Left = 32
+    Top = 96
+    Width = 48
     Height = 13
-    Caption = 'Logado'
+    Caption = 'Chamada:'
+  end
+  object lblAtendido: TLabel
+    Left = 32
+    Top = 120
+    Width = 45
+    Height = 13
+    Caption = 'Atendido:'
   end
   object btnLogar: TButton
     Left = 32
@@ -36,5 +43,12 @@ object FormMain: TFormMain
     Caption = 'Logar'
     TabOrder = 0
     OnClick = btnLogarClick
+  end
+  object txtInter: TEdit
+    Left = 16
+    Top = 152
+    Width = 457
+    Height = 25
+    TabOrder = 1
   end
 end

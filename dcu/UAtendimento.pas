@@ -28,13 +28,23 @@ uses  Windows,
 procedure LogarInt (st: Pointer); stdcall;
 procedure LogarInt; external 'EpbxIntegracao.dll' name 'Logar';
 
+// Deslogar
+procedure DeslogarInt (); stdcall;
+procedure DeslogarInt; external 'EpbxIntegracao.dll' name 'Deslogar';
+
+// Alterar o intervalo
+procedure AlterarIntervaloInt (id: Integer); stdcall;
+procedure AlterarIntervaloInt; external 'EpbxIntegracao.dll' name 'AlterarIntervalo';
+
+// Encerrar ligação
+procedure EncerrarLigacaoInt (); stdcall;
+procedure EncerrarLigacaoInt; external 'EpbxIntegracao.dll' name 'EncerrarLigacao';
+
 {
   Assinatura dos Métodos de CallBack
 }
 
 type
-
-TOnEvent        = procedure() stdcall;
 TOnEventPointer = procedure(param: Pointer) stdcall;
 
 {
@@ -55,10 +65,7 @@ TOnEventPointer = procedure(param: Pointer) stdcall;
 }
 
 // método set callback Wrapper dll
-TSetOnEvent         = procedure () cdecl;
 TSetOnEventPointer  = procedure (_proc: TOnEventPointer) cdecl;
-
-// TSetOnLogado
 
 {
   Classe Atendimento
@@ -74,15 +81,29 @@ Atendimento = class
     { procedure e function }
 
   public
+
+    SetOnLogado             : TSetOnEventPointer;
+    SetOnDeslogado          : TSetOnEventPointer;
+    SetOnInfoIntervaloRamal : TSetOnEventPointer;
+    SetOnSetIntervaloRamal  : TSetOnEventPointer;
+    SetOnTempoStatus        : TSetOnEventPointer;
+    SetOnInfoCliente        : TSetOnEventPointer;
+    SetOnRingVirtual        : TSetOnEventPointer;
+    SetOnChamada            : TSetOnEventPointer;
+    SetOnAtendido           : TSetOnEventPointer;
+    SetOnPathNomeDialogo    : TSetOnEventPointer;
+    SetOnChamadaPerdida     : TSetOnEventPointer;
+    SetOnDesliga            : TSetOnEventPointer;
+
     { Eventos de callback Inicio }
 
-    OnRingVirtual         : TOnEvent;
     OnLogado              : TOnEventPointer;
     OnDeslogado           : TOnEventPointer;
     OnInfoIntervaloRamal  : TOnEventPointer;
     OnSetIntervaloRamal   : TOnEventPointer;
     OnTempoStatus         : TOnEventPointer;
     OnInfoCliente         : TOnEventPointer;
+    OnRingVirtual         : TOnEventPointer;
     OnChamada             : TOnEventPointer;
     OnAtendido            : TOnEventPointer;
     OnPathNomeDialogo     : TOnEventPointer;
@@ -102,6 +123,7 @@ Atendimento = class
 
     { Métodos para integraçào com a DLL }
     procedure Logar(ramal: Integer; senha: String);
+    procedure Deslogar();
 
 end;
 
@@ -121,13 +143,13 @@ begin
   inherited;
   HInstDll              := 0;
 
-  OnRingVirtual         := nil;
   OnLogado              := nil;
   OnDeslogado           := nil;
   OnInfoIntervaloRamal  := nil;
   OnSetIntervaloRamal   := nil;
   OnTempoStatus         := nil;
   OnInfoCliente         := nil;
+  OnRingVirtual         := nil;
   OnChamada             := nil;
   OnAtendido            := nil;
   OnPathNomeDialogo     := nil;
@@ -151,9 +173,19 @@ end;
   Seta os eventos de callback
 }
 function Atendimento.Inicia;
-var
-  SetOnLogado       : TSetOnEventPointer;
-  SetOnTempoStatus  : TSetOnEventPointer;
+{var
+  SetOnLogado             : TSetOnEventPointer;
+  SetOnDeslogado          : TSetOnEventPointer;
+  SetOnInfoIntervaloRamal : TSetOnEventPointer;
+  SetOnSetIntervaloRamal  : TSetOnEventPointer;
+  SetOnTempoStatus        : TSetOnEventPointer;
+  SetOnInfoCliente        : TSetOnEventPointer;
+  SetOnRingVirtual        : TSetOnEventPointer;
+  SetOnChamada            : TSetOnEventPointer;
+  SetOnAtendido           : TSetOnEventPointer;
+  SetOnPathNomeDialogo    : TSetOnEventPointer;
+  SetOnChamadaPerdida     : TSetOnEventPointer;
+  SetOnDesliga            : TSetOnEventPointer;}
 begin
   Result := true;
 
@@ -167,17 +199,103 @@ begin
 
   // Seta os eventos da DLL
   // para se comunicar com esta instância
-  SetOnLogado := GetProcAddress(HInstDll, 'SetOnLogado');
-  if Assigned(SetOnLogado) and
-    Assigned(OnLogado) then
+
+  // SetOnLogado
+  if Assigned(OnLogado) then
+  begin
+    SetOnLogado := GetProcAddress(HInstDll, 'SetOnLogado');
+    if Assigned(SetOnLogado) then
       SetOnLogado(@OnLogado);
+  end;
+
+  // SetOnDeslogado
+  if Assigned(OnDeslogado) then
+  begin
+    SetOnDeslogado := GetProcAddress(HInstDll, 'SetOnDeslogado');
+    if Assigned(SetOnDeslogado) then
+      SetOnDeslogado(@OnDeslogado);
+  end;
+
+  // SetOnInfoIntervaloRamal
+  if Assigned(OnInfoIntervaloRamal) then
+  begin
+    SetOnInfoIntervaloRamal := GetProcAddress(HInstDll, 'SetOnInfoIntervaloRamal');
+    if Assigned(SetOnInfoIntervaloRamal) then
+      SetOnInfoIntervaloRamal(@OnInfoIntervaloRamal);
+  end;
+
+  // SetOnSetIntervaloRamal
+  if Assigned(OnSetIntervaloRamal) then
+  begin
+    SetOnSetIntervaloRamal := GetProcAddress(HInstDll, 'SetOnSetIntervaloRamal');
+    if Assigned(SetOnSetIntervaloRamal) then
+      SetOnSetIntervaloRamal(@OnSetIntervaloRamal);
+  end;
 
   // SetOnTempoStatus
-  SetOnTempoStatus := GetProcAddress(HInstDll, 'SetOnTempoStatus');
-  if Assigned(SetOnTempoStatus) and
-    Assigned(OnTempoStatus) then
+  if Assigned(OnTempoStatus) then
+  begin
+    SetOnTempoStatus := GetProcAddress(HInstDll, 'SetOnTempoStatus');
+    if Assigned(SetOnTempoStatus) then
       SetOnTempoStatus(@OnTempoStatus);
+  end;
 
+  // SetOnInfoCliente
+  if Assigned(OnInfoCliente) then
+  begin
+    SetOnInfoCliente := GetProcAddress(HInstDll, 'SetOnInfoCliente');
+    if Assigned(SetOnInfoCliente) then
+      SetOnInfoCliente(@OnInfoCliente);
+  end;
+
+  // SetOnRingVirtual
+  if Assigned(OnRingVirtual) then
+  begin
+    SetOnRingVirtual := GetProcAddress(HInstDll, 'SetOnRingVirtual');
+    if Assigned(SetOnRingVirtual) then
+      SetOnRingVirtual(@OnRingVirtual);
+  end;
+
+  // SetOnChamada
+  if Assigned(OnChamada) then
+  begin
+    SetOnChamada := GetProcAddress(HInstDll, 'SetOnChamada');
+    if Assigned(SetOnChamada) then
+      SetOnChamada(@OnChamada);
+  end;
+
+  // SetOnAtendido
+  if Assigned(OnAtendido) then
+  begin
+    SetOnAtendido := GetProcAddress(HInstDll, 'SetOnAtendido');
+    if Assigned(SetOnAtendido) then
+      SetOnAtendido(@OnAtendido);
+  end;
+
+  // SetOnPathNomeDialogo
+  if Assigned(OnPathNomeDialogo) then
+  begin
+    SetOnPathNomeDialogo := GetProcAddress(HInstDll, 'SetOnPathNomeDialogo');
+    if Assigned(SetOnPathNomeDialogo) then
+      SetOnPathNomeDialogo(@OnPathNomeDialogo);
+  end;
+
+  // SetOnChamadaPerdida
+  if Assigned(OnChamadaPerdida) then
+  begin
+    SetOnChamadaPerdida := GetProcAddress(HInstDll, 'SetOnChamadaPerdida');
+    if Assigned(SetOnChamadaPerdida) then
+      SetOnChamadaPerdida(@OnChamadaPerdida);
+  end;
+
+  // SetOnDesliga
+  if Assigned(OnDesliga) then
+  begin
+    SetOnDesliga := GetProcAddress(HInstDll, 'SetOnDesliga');
+    if Assigned(SetOnDesliga) then
+      SetOnDesliga(@OnDesliga);
+  end;
+      
 end;
 
 {
@@ -191,6 +309,10 @@ end;
 
 {
   Métodos para integraçào com a DLL
+}
+
+{
+  Logon do ramal
 }
 procedure Atendimento.Logar(ramal: Integer; senha: String);
 var
@@ -219,11 +341,23 @@ begin
     StrPCopy(_servidor, IP_SERVIDOR);
     stL.Servidor := @_servidor;
     LogarInt(@stL);
+
+    ShowMessage('Fim do LogarInt() !!!');
+
   end
   else
   begin
     { TODO : Logar erro }
   end;
+end;
+
+{
+  Logoff do ramal
+}
+procedure Atendimento.Deslogar();
+begin
+  if Assigned(@DeslogarInt) then
+    DeslogarInt;
 end;
 
 end.
