@@ -156,13 +156,11 @@ begin
   OnChamadaPerdida      := nil;
   OnDesliga             := nil;
 
-  ShowMessage('Novo atendimento!');
 end;
 
 destructor Atendimento.Destroy;
 begin
   Finaliza;
-  ShowMessage('Destroy atendimento!');
   inherited;
 end;
 
@@ -341,8 +339,6 @@ begin
     StrPCopy(_servidor, IP_SERVIDOR);
     stL.Servidor := @_servidor;
     LogarInt(@stL);
-
-    ShowMessage('Fim do LogarInt() !!!');
 
   end
   else
