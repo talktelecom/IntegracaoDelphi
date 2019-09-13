@@ -187,7 +187,7 @@ TAM_SENHA         = 30;
 TAM_IP_SERVIDOR   = 80;
 
 // Do arquivo de configuração / banco de dados
-IP_SERVIDOR       = '192.168.21.58';
+IP_SERVIDOR       = '192.168.21.55';
 
 implementation
 

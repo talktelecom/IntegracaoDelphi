@@ -22,8 +22,14 @@ TFormMain = class(TForm)
     lblChamada: TLabel;
     lblAtendido: TLabel;
     txtInter: TEdit;
+    cboIntervalo: TComboBox;
+    btnIntervalo: TButton;
+    lblNumero: TLabel;
+    Edit1: TEdit;
+    btnDiscar: TButton;
   procedure btnLogarClick(Sender: TObject);
   procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure btnDiscarClick(Sender: TObject);
 private
   _thLogar: ThLogar;
 
@@ -74,7 +80,7 @@ begin
   end
   else
     FormMain.Caption := 'Atendimento - Erro no logon';
-  FormMain.btnLogar.Enabled := true;
+    FormMain.btnLogar.Enabled := true;
 end;
 
 {
@@ -104,7 +110,9 @@ begin
     FormMain.txtInter.Text := FormMain.txtInter.Text + ' - ' + st.Descricao
   else
     FormMain.txtInter.Text := st.Descricao;
-  
+
+   FormMain.cboIntervalo.Items.Add(IntToStr(st.RamalStatusDetalheId) + ' - ' + st.Descricao);
+
 end;
 
 {
@@ -304,6 +312,11 @@ begin
   // Liberamos instancia atendimento
   if Assigned(_atendimento)then
     _atendimento.Destroy;
+end;
+
+procedure TFormMain.btnDiscarClick(Sender: TObject);
+begin
+     _atendimento.AlterarIntervalo(1);
 end;
 
 end.

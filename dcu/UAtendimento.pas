@@ -124,7 +124,7 @@ Atendimento = class
     { Métodos para integraçào com a DLL }
     procedure Logar(ramal: Integer; senha: String);
     procedure Deslogar();
-
+    procedure AlterarIntervalo(IdIntervalo: Integer);
 end;
 
 implementation
@@ -354,6 +354,12 @@ procedure Atendimento.Deslogar();
 begin
   if Assigned(@DeslogarInt) then
     DeslogarInt;
+end;
+
+procedure Atendimento.AlterarIntervalo(IdIntervalo: Integer);
+begin
+  if Assigned(@AlterarIntervaloInt) then
+    AlterarIntervaloInt(IdIntervalo);
 end;
 
 end.
