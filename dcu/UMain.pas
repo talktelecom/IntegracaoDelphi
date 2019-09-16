@@ -337,7 +337,7 @@ begin
     i := i + 1;
   end;
   select := palavra;
-  _atendimento.AlterarIntervalo(StrToInt(select))
+  _atendimento.AlterarIntervalo(StrToInt(select));
 
 {
   textosel  :=  cboIntervalo.Items.Text;
