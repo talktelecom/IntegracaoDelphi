@@ -73,6 +73,7 @@ object FormMain: TFormMain
     Height = 25
     Caption = 'Intervalo'
     TabOrder = 3
+    OnClick = btnIntervaloClick
   end
   object Edit1: TEdit
     Left = 64

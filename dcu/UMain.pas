@@ -30,6 +30,7 @@ TFormMain = class(TForm)
   procedure btnLogarClick(Sender: TObject);
   procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnDiscarClick(Sender: TObject);
+    procedure btnIntervaloClick(Sender: TObject);
 private
   _thLogar: ThLogar;
 
@@ -45,6 +46,8 @@ var
   _atendimento : Atendimento;
 
 implementation
+
+uses StrUtils;
 
 {
   Métodos de CallBack
@@ -316,7 +319,31 @@ end;
 
 procedure TFormMain.btnDiscarClick(Sender: TObject);
 begin
-     _atendimento.AlterarIntervalo(1);
+//     _atendimento.AlterarIntervalo(1);
+end;
+
+procedure TFormMain.btnIntervaloClick(Sender: TObject);
+var select, textosel: string;
+    sPos: Integer;
+    i : integer;
+    letra, palavra : string;
+
+begin
+  i := 1;
+  while not (letra = '-') do
+  begin
+    palavra := palavra + letra;
+    letra := (cboIntervalo.Text[i]);
+    i := i + 1;
+  end;
+  select := palavra;
+  _atendimento.AlterarIntervalo(StrToInt(select))
+
+{
+  textosel  :=  cboIntervalo.Items.Text;
+  select :=  LeftStr(textosel,2);
+  _atendimento.AlterarIntervalo(StrToInt(select));
+}
 end;
 
 end.
