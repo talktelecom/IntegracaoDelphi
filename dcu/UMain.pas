@@ -17,7 +17,7 @@ uses
 type
 
 TFormMain = class(TForm)
-  btnLogar: TButton;
+    btnLogar: TButton;
     lblIntervalo: TLabel;
     lblChamada: TLabel;
     lblAtendido: TLabel;
@@ -25,12 +25,17 @@ TFormMain = class(TForm)
     cboIntervalo: TComboBox;
     btnIntervalo: TButton;
     lblNumero: TLabel;
-    Edit1: TEdit;
+    txtNumero: TEdit;
     btnDiscar: TButton;
-  procedure btnLogarClick(Sender: TObject);
-  procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    txtRamal: TEdit;
+    Label1: TLabel;
+    Label2: TLabel;
+    txtSenha: TEdit;
+    procedure btnLogarClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnDiscarClick(Sender: TObject);
     procedure btnIntervaloClick(Sender: TObject);
+    procedure txtRamalKeyPress(Sender: TObject; var Key: Char);
 private
   _thLogar: ThLogar;
 
@@ -256,7 +261,7 @@ end;
 procedure TFormMain.btnLogarClick(Sender: TObject);
 begin
   if(btnLogar.Caption = 'Logar') then
-    Logar(1006, 'TalkTelecom$@2017')
+    Logar( StrToInt(FormMain.txtRamal.Text), FormMain.txtSenha.Text)
   else
     Deslogar;
 end;
@@ -318,19 +323,20 @@ begin
 end;
 
 procedure TFormMain.btnDiscarClick(Sender: TObject);
+var Numero: string;
+    direcao: Integer;
+    st : StLogado;
 begin
 //     _atendimento.AlterarIntervalo(1);
 end;
 
 procedure TFormMain.btnIntervaloClick(Sender: TObject);
-var select, textosel: string;
-    sPos: Integer;
-    i : integer;
-    letra, palavra : string;
+var select, letra, palavra : string;
+    a, i : integer;
 
 begin
   i := 1;
-  while not (letra = '-') do
+  while not (letra = ' ') do
   begin
     palavra := palavra + letra;
     letra := (cboIntervalo.Text[i]);
@@ -339,11 +345,17 @@ begin
   select := palavra;
   _atendimento.AlterarIntervalo(StrToInt(select));
 
-{
-  textosel  :=  cboIntervalo.Items.Text;
-  select :=  LeftStr(textosel,2);
-  _atendimento.AlterarIntervalo(StrToInt(select));
-}
+end;
+
+
+procedure TFormMain.txtRamalKeyPress(Sender: TObject; var Key: Char);
+begin
+  if (Key in ['.', ','])
+     then if (pos(',', (Sender as TEdit).Text) = 0)
+             then Key := ','
+          else Key := #7
+  else if (not(Key in ['0'..'9', #8]))
+          then Key := #7;
 end;
 
 end.

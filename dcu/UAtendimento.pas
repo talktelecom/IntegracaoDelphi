@@ -7,7 +7,6 @@ uses  Windows,
       UGlobalAtendimento,
       Dialogs,
       Classes;
-
 {
   Métodos da Dll
 
@@ -23,6 +22,7 @@ uses  Windows,
   .
   .
 }
+Function ServidorIp() : String;
 
 // Logar
 procedure LogarInt (st: Pointer); stdcall;
@@ -33,7 +33,7 @@ procedure DeslogarInt (); stdcall;
 procedure DeslogarInt; external 'EpbxIntegracao.dll' name 'Deslogar';
 
 // Alterar o intervalo
-procedure AlterarIntervaloInt (id: Integer); stdcall;
+procedure AlterarIntervaloInt (id: Integer); cdecl;
 procedure AlterarIntervaloInt; external 'EpbxIntegracao.dll' name 'AlterarIntervalo';
 
 // Encerrar ligação
@@ -318,6 +318,7 @@ var
   stL       : StLogar;
   _senha    : array [0..80] of char;
   _servidor : array [0..80] of char;
+  Retorno   : string;
 begin
 
   // Inicia a classe atendimento
@@ -336,7 +337,8 @@ begin
     stL.RamalVirtual := ramal;
     StrPCopy(_senha, senha);
     stL.Senha := @_senha;
-    StrPCopy(_servidor, IP_SERVIDOR);
+    Retorno := ServidorIp;
+    StrPCopy(_servidor, Retorno);
     stL.Servidor := @_servidor;
     LogarInt(@stL);
 
@@ -361,6 +363,45 @@ begin
   if Assigned(@AlterarIntervaloInt) then
     AlterarIntervaloInt(IdIntervalo);
 end;
+
+
+Function ServidorIp : String;
+var   arq: TextFile; { declarando a variável "arq" do tipo arquivo texto }
+      nreg: Integer;
+      i: Integer;
+      ipremoto: string;
+      linha: string;
+      opcao : integer;
+
+begin
+  try
+    AssignFile(arq, '..\dcu\Config.ini');
+
+    {$I-}
+    Reset(arq);
+    {$I+}
+    nreg := 0;
+
+    while not Eof(arq) do { enquanto não atingir a marca de final de arquivo }
+    begin
+      Readln(arq, linha); { lê uma linha, com os dados de um aluno, do arquivo }
+
+      nreg := nreg + 1;
+
+      i := pos('=', linha);
+      ipremoto := Trim(copy(linha,i + 1,20)); { recupera o nome do aluno }
+
+    end;
+
+    CloseFile(arq);
+    result := ipremoto;
+
+    except
+      CloseFile(arq);
+      result := '';
+    end;
+  end;
+
 
 end.
 
