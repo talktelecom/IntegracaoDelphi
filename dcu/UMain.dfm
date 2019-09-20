@@ -1,8 +1,8 @@
 object FormMain: TFormMain
-  Left = 736
-  Top = 299
+  Left = 244
+  Top = 380
   Width = 517
-  Height = 265
+  Height = 344
   Caption = 'Atendimento'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -55,6 +55,34 @@ object FormMain: TFormMain
     Width = 37
     Height = 13
     Caption = 'Senha :'
+  end
+  object Label3: TLabel
+    Left = 8
+    Top = 236
+    Width = 43
+    Height = 13
+    Caption = 'Numero :'
+  end
+  object lblOnChamando: TLabel
+    Left = 56
+    Top = 236
+    Width = 65
+    Height = 13
+    Caption = 'OnChamando'
+  end
+  object Label5: TLabel
+    Left = 8
+    Top = 260
+    Width = 43
+    Height = 13
+    Caption = 'Numero :'
+  end
+  object lblOnAtendido: TLabel
+    Left = 56
+    Top = 260
+    Width = 66
+    Height = 13
+    Caption = 'lblOnAtendido'
   end
   object btnLogar: TButton
     Left = 219
@@ -121,5 +149,14 @@ object FormMain: TFormMain
     Height = 21
     TabOrder = 7
     Text = 'TalkTelecom$@2017'
+  end
+  object btnDesligar: TButton
+    Left = 399
+    Top = 59
+    Width = 75
+    Height = 25
+    Caption = 'Desligar'
+    TabOrder = 8
+    OnClick = btnDesligarClick
   end
 end

@@ -37,8 +37,8 @@ procedure AlterarIntervaloInt (id: Integer); cdecl;
 procedure AlterarIntervaloInt; external 'EpbxIntegracao.dll' name 'AlterarIntervalo';
 
 // Encerrar ligação
-procedure EncerrarLigacaoInt (); stdcall;
-procedure EncerrarLigacaoInt; external 'EpbxIntegracao.dll' name 'EncerrarLigacao';
+procedure DesligarInt (); stdcall;
+procedure DesligarInt; external 'EpbxIntegracao.dll' name 'Desligar';
 
 {
   Assinatura dos Métodos de CallBack
@@ -125,6 +125,8 @@ Atendimento = class
     procedure Logar(ramal: Integer; senha: String);
     procedure Deslogar();
     procedure AlterarIntervalo(IdIntervalo: Integer);
+    procedure Desligar();
+
 end;
 
 implementation
@@ -364,6 +366,11 @@ begin
     AlterarIntervaloInt(IdIntervalo);
 end;
 
+procedure Atendimento.Desligar();
+begin
+  if Assigned(@DesligarInt) then
+    DesligarInt();
+end;
 
 Function ServidorIp : String;
 var   arq: TextFile; { declarando a variável "arq" do tipo arquivo texto }

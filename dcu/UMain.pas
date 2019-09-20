@@ -31,11 +31,17 @@ TFormMain = class(TForm)
     Label1: TLabel;
     Label2: TLabel;
     txtSenha: TEdit;
+    Label3: TLabel;
+    lblOnChamando: TLabel;
+    Label5: TLabel;
+    lblOnAtendido: TLabel;
+    btnDesligar: TButton;
     procedure btnLogarClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnDiscarClick(Sender: TObject);
     procedure btnIntervaloClick(Sender: TObject);
     procedure txtRamalKeyPress(Sender: TObject; var Key: Char);
+    procedure btnDesligarClick(Sender: TObject);
 private
   _thLogar: ThLogar;
 
@@ -99,7 +105,7 @@ begin
   FormMain.Caption := 'Atendimento';
   FormMain.btnLogar.Caption := 'Logar';
   FormMain.btnLogar.Enabled := true;
-  FormMain.txtInter.Text := ''; 
+  FormMain.txtInter.Text := '';
 end;
 
 {
@@ -118,8 +124,7 @@ begin
     FormMain.txtInter.Text := FormMain.txtInter.Text + ' - ' + st.Descricao
   else
     FormMain.txtInter.Text := st.Descricao;
-
-   FormMain.cboIntervalo.Items.Add(IntToStr(st.RamalStatusDetalheId) + ' - ' + st.Descricao);
+    FormMain.cboIntervalo.Items.Add(IntToStr(st.RamalStatusDetalheId) + ' - ' + st.Descricao);
 
 end;
 
@@ -186,7 +191,7 @@ begin
 
   {  TODO : Tratar a chamada. }
 
-  FormMain.lblChamada.Caption := 'Chamada:' + st.Telefone;
+  FormMain.lblOnChamando.Caption := 'Chamada:' + st.Telefone;
 
 end;
 
@@ -202,7 +207,7 @@ begin
 
   {  TODO : Tratar a ligação atendida. }
 
-  FormMain.lblAtendido.Caption := 'Atendido:' + st.Telefone;
+  FormMain.lblOnAtendido.Caption := 'Atendido:' + st.Telefone;
 
 end;
 
@@ -327,7 +332,7 @@ var Numero: string;
     direcao: Integer;
     st : StLogado;
 begin
-//     _atendimento.AlterarIntervalo(1);
+
 end;
 
 procedure TFormMain.btnIntervaloClick(Sender: TObject);
@@ -344,7 +349,6 @@ begin
   end;
   select := palavra;
   _atendimento.AlterarIntervalo(StrToInt(select));
-
 end;
 
 
@@ -356,6 +360,11 @@ begin
           else Key := #7
   else if (not(Key in ['0'..'9', #8]))
           then Key := #7;
+end;
+
+procedure TFormMain.btnDesligarClick(Sender: TObject);
+begin
+      _atendimento.Desligar();
 end;
 
 end.
