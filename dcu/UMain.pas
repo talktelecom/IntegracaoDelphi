@@ -328,11 +328,15 @@ begin
 end;
 
 procedure TFormMain.btnDiscarClick(Sender: TObject);
-var Numero: string;
+var Numero: PChar;
+    _numero    : array [0..30] of char;
     direcao: Integer;
-    st : StLogado;
 begin
+  Numero :=  @_numero;
 
+  StrPCopy(_numero, txtNumero.Text);
+  direcao := 1;
+  _atendimento.Discar(Numero, direcao);
 end;
 
 procedure TFormMain.btnIntervaloClick(Sender: TObject);

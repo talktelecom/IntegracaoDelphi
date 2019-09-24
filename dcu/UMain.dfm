@@ -1,6 +1,6 @@
 object FormMain: TFormMain
-  Left = 244
-  Top = 380
+  Left = 834
+  Top = 342
   Width = 517
   Height = 344
   Caption = 'Atendimento'
@@ -59,26 +59,26 @@ object FormMain: TFormMain
   object Label3: TLabel
     Left = 8
     Top = 236
-    Width = 43
+    Width = 68
     Height = 13
-    Caption = 'Numero :'
+    Caption = 'OnChamando:'
   end
   object lblOnChamando: TLabel
-    Left = 56
+    Left = 88
     Top = 236
-    Width = 65
+    Width = 71
     Height = 13
-    Caption = 'OnChamando'
+    Caption = 'OnChamando :'
   end
   object Label5: TLabel
     Left = 8
     Top = 260
-    Width = 43
+    Width = 72
     Height = 13
-    Caption = 'Numero :'
+    Caption = 'lblOnAtendido :'
   end
   object lblOnAtendido: TLabel
-    Left = 56
+    Left = 88
     Top = 260
     Width = 66
     Height = 13
