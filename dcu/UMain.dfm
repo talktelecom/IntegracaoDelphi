@@ -1,9 +1,9 @@
 object FormMain: TFormMain
   Left = 834
   Top = 342
-  Width = 517
-  Height = 344
   Caption = 'Atendimento'
+  ClientHeight = 261
+  ClientWidth = 443
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -12,25 +12,26 @@ object FormMain: TFormMain
   Font.Style = []
   OldCreateOrder = False
   OnClose = FormClose
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object lblIntervalo: TLabel
-    Left = 16
-    Top = 139
+    Left = 17
+    Top = 67
     Width = 44
     Height = 13
     Caption = 'Intervalo:'
   end
   object lblChamada: TLabel
-    Left = 48
-    Top = 176
+    Left = 8
+    Top = 214
     Width = 48
     Height = 13
     Caption = 'Chamada:'
   end
   object lblAtendido: TLabel
-    Left = 0
-    Top = 176
+    Left = 8
+    Top = 195
     Width = 45
     Height = 13
     Caption = 'Atendido:'
@@ -42,47 +43,26 @@ object FormMain: TFormMain
     Height = 13
     Caption = 'Numero :'
   end
-  object Label1: TLabel
+  object lblRamal: TLabel
     Left = 16
     Top = 12
     Width = 36
     Height = 13
     Caption = 'Ramal :'
   end
-  object Label2: TLabel
+  object lblSenha: TLabel
     Left = 17
     Top = 36
     Width = 37
     Height = 13
     Caption = 'Senha :'
   end
-  object Label3: TLabel
+  object lblErro: TLabel
     Left = 8
-    Top = 236
-    Width = 68
+    Top = 233
+    Width = 22
     Height = 13
-    Caption = 'OnChamando:'
-  end
-  object lblOnChamando: TLabel
-    Left = 88
-    Top = 236
-    Width = 71
-    Height = 13
-    Caption = 'OnChamando :'
-  end
-  object Label5: TLabel
-    Left = 8
-    Top = 260
-    Width = 72
-    Height = 13
-    Caption = 'lblOnAtendido :'
-  end
-  object lblOnAtendido: TLabel
-    Left = 88
-    Top = 260
-    Width = 66
-    Height = 13
-    Caption = 'lblOnAtendido'
+    Caption = 'Erro:'
   end
   object btnLogar: TButton
     Left = 219
@@ -93,52 +73,38 @@ object FormMain: TFormMain
     TabOrder = 0
     OnClick = btnLogarClick
   end
-  object txtInter: TEdit
-    Left = 0
-    Top = 200
-    Width = 497
-    Height = 21
-    TabOrder = 1
-  end
   object cboIntervalo: TComboBox
-    Left = 64
-    Top = 139
+    Left = 67
+    Top = 64
     Width = 313
     Height = 21
     ItemHeight = 13
-    TabOrder = 2
-  end
-  object btnIntervalo: TButton
-    Left = 399
-    Top = 139
-    Width = 75
-    Height = 25
-    Caption = 'Intervalo'
-    TabOrder = 3
-    OnClick = btnIntervaloClick
+    TabOrder = 1
+    OnChange = cboIntervaloChange
   end
   object txtNumero: TEdit
     Left = 64
     Top = 107
     Width = 313
     Height = 21
-    TabOrder = 4
+    TabOrder = 2
+    OnChange = txtNumeroChange
   end
   object btnDiscar: TButton
-    Left = 399
-    Top = 102
+    Left = 110
+    Top = 134
     Width = 75
     Height = 25
     Caption = 'Discar'
-    TabOrder = 5
+    TabOrder = 3
     OnClick = btnDiscarClick
   end
   object txtRamal: TEdit
-    Left = 64
+    Left = 68
     Top = 8
     Width = 145
     Height = 21
-    TabOrder = 6
+    TabOrder = 4
     Text = '2004'
     OnKeyPress = txtRamalKeyPress
   end
@@ -147,16 +113,16 @@ object FormMain: TFormMain
     Top = 32
     Width = 145
     Height = 21
-    TabOrder = 7
+    PasswordChar = '*'
+    TabOrder = 5
     Text = 'TalkTelecom$@2017'
   end
-  object btnDesligar: TButton
-    Left = 399
-    Top = 59
-    Width = 75
-    Height = 25
-    Caption = 'Desligar'
-    TabOrder = 8
-    OnClick = btnDesligarClick
+  object chkInterna: TCheckBox
+    Left = 17
+    Top = 142
+    Width = 97
+    Height = 17
+    Caption = 'Interna'
+    TabOrder = 6
   end
 end

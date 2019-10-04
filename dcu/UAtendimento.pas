@@ -22,27 +22,26 @@ uses  Windows,
   .
   .
 }
-Function ServidorIp() : String;
 
 // Logar
 procedure LogarInt (st: Pointer); stdcall;
-procedure LogarInt; external 'EpbxIntegracao.dll' name 'Logar';
+procedure LogarInt; external EPBX_INTEGRACAO name 'Logar';
 
 // Deslogar
 procedure DeslogarInt (); stdcall;
-procedure DeslogarInt; external 'EpbxIntegracao.dll' name 'Deslogar';
+procedure DeslogarInt; external EPBX_INTEGRACAO name 'Deslogar';
 
 // Alterar o intervalo
 procedure AlterarIntervaloInt (id: Integer); cdecl;
-procedure AlterarIntervaloInt; external 'EpbxIntegracao.dll' name 'AlterarIntervalo';
+procedure AlterarIntervaloInt; external EPBX_INTEGRACAO name 'AlterarIntervalo';
 
 // Encerrar ligação
 procedure DesligarInt (); stdcall;
-procedure DesligarInt; external 'EpbxIntegracao.dll' name 'Desligar';
+procedure DesligarInt; external EPBX_INTEGRACAO name 'Desligar';
 
 // Efetuar ligação
 procedure DiscarInt (Numero: Pointer;  TipoDiscagem: Integer); cdecl;
-procedure DiscarInt; external 'EpbxIntegracao.dll' name 'Discar';
+procedure DiscarInt; external EPBX_INTEGRACAO name 'Discar';
 
 
 {
@@ -87,6 +86,8 @@ Atendimento = class
 
   public
 
+    IntervaloAtual : integer;
+
     SetOnLogado             : TSetOnEventPointer;
     SetOnDeslogado          : TSetOnEventPointer;
     SetOnInfoIntervaloRamal : TSetOnEventPointer;
@@ -99,6 +100,8 @@ Atendimento = class
     SetOnPathNomeDialogo    : TSetOnEventPointer;
     SetOnChamadaPerdida     : TSetOnEventPointer;
     SetOnDesliga            : TSetOnEventPointer;
+    SetOnDisca              : TSetOnEventPointer;
+    SetOnDiscaErro          : TSetOnEventPointer;
 
     { Eventos de callback Inicio }
 
@@ -114,12 +117,15 @@ Atendimento = class
     OnPathNomeDialogo     : TOnEventPointer;
     OnChamadaPerdida      : TOnEventPointer;
     OnDesliga             : TOnEventPointer;
+    OnDisca               : TOnEventPointer;
+    OnDiscaErro           : TOnEventPointer;
 
     { Eventos de callback Fim }
 
     destructor Destroy; override;
 
   published
+
     { Inicialização }
     constructor Create;
 
@@ -162,6 +168,8 @@ begin
   OnPathNomeDialogo     := nil;
   OnChamadaPerdida      := nil;
   OnDesliga             := nil;
+  OnDisca               := nil;
+  OnDiscaErro           := nil;
 
 end;
 
@@ -178,24 +186,11 @@ end;
   Seta os eventos de callback
 }
 function Atendimento.Inicia;
-{var
-  SetOnLogado             : TSetOnEventPointer;
-  SetOnDeslogado          : TSetOnEventPointer;
-  SetOnInfoIntervaloRamal : TSetOnEventPointer;
-  SetOnSetIntervaloRamal  : TSetOnEventPointer;
-  SetOnTempoStatus        : TSetOnEventPointer;
-  SetOnInfoCliente        : TSetOnEventPointer;
-  SetOnRingVirtual        : TSetOnEventPointer;
-  SetOnChamada            : TSetOnEventPointer;
-  SetOnAtendido           : TSetOnEventPointer;
-  SetOnPathNomeDialogo    : TSetOnEventPointer;
-  SetOnChamadaPerdida     : TSetOnEventPointer;
-  SetOnDesliga            : TSetOnEventPointer;}
 begin
   Result := true;
 
   // Carrega a dll
-  HInstDll := LoadLibrary('EpbxIntegracao.dll');
+  HInstDll := LoadLibrary(EPBX_INTEGRACAO);
   if (HInstDll = 0) then begin
     { TODO : Logar erro }
     Result := false;
@@ -300,7 +295,23 @@ begin
     if Assigned(SetOnDesliga) then
       SetOnDesliga(@OnDesliga);
   end;
-      
+
+  // SetOnDisca
+  if Assigned(OnDisca) then
+  begin
+    SetOnDisca := GetProcAddress(HInstDll, 'SetOnDisca');
+    if Assigned(SetOnDisca) then
+      SetOnDesliga(@OnDisca);
+  end;
+
+  // SetOnDiscaErro
+  if Assigned(OnDiscaErro) then
+  begin
+    SetOnDiscaErro := GetProcAddress(HInstDll, 'SetOnDiscaErro');
+    if Assigned(SetOnDiscaErro) then
+      SetOnDiscaErro(@OnDiscaErro);
+  end;
+
 end;
 
 {
@@ -325,34 +336,44 @@ var
   stL       : StLogar;
   _senha    : array [0..80] of char;
   _servidor : array [0..80] of char;
-  Retorno   : string;
+  strServidor : string;
 begin
 
   // Inicia a classe atendimento
   ret := Inicia;
   if (ret = false)  then begin
-    { TODO : Logar erro }
+    UGlobalAtendimento.Trace('Erro ao iniciar a classe atendimento');
     exit;
   end;
 
   if Assigned(@LogarInt) then begin
+
+    // Pega as informações do ini
+    strServidor :=
+      UGlobalAtendimento.LeConfigIni(
+        'config',
+        'servidor',
+        strDirExe + '\' + COFIG_INI,
+        80);
+
+    StrPCopy(_senha, senha);
+    StrPCopy(_servidor, strServidor);
+
     ZeroMemory(@stL,SizeOf(StLogar));
+
     stL.Id := 0;
     stL.Porta := 44900;
     stL.IntervaloCustomizado := 1;
     stL.Ramal := ramal;
     stL.RamalVirtual := ramal;
-    StrPCopy(_senha, senha);
     stL.Senha := @_senha;
-    Retorno := ServidorIp;
-    StrPCopy(_servidor, Retorno);
     stL.Servidor := @_servidor;
-    LogarInt(@stL);
 
+    LogarInt(@stL);
   end
   else
   begin
-    { TODO : Logar erro }
+    UGlobalAtendimento.Trace('Erro ao carregar o método Logar da ' + EPBX_INTEGRACAO);
   end;
 end;
 
@@ -382,45 +403,6 @@ begin
   if Assigned(@DiscarInt) then
     DiscarInt(Numero,  TipoDiscagem);
 end;
-
-
-Function ServidorIp : String;
-var   arq: TextFile; { declarando a variável "arq" do tipo arquivo texto }
-      nreg: Integer;
-      i: Integer;
-      ipremoto: string;
-      linha: string;
-      opcao : integer;
-
-begin
-  try
-    AssignFile(arq, '..\dcu\Config.ini');
-
-    {$I-}
-    Reset(arq);
-    {$I+}
-    nreg := 0;
-
-    while not Eof(arq) do { enquanto não atingir a marca de final de arquivo }
-    begin
-      Readln(arq, linha); { lê uma linha, com os dados de um aluno, do arquivo }
-
-      nreg := nreg + 1;
-
-      i := pos('=', linha);
-      ipremoto := Trim(copy(linha,i + 1,20)); { recupera o nome do aluno }
-
-    end;
-
-    CloseFile(arq);
-    result := ipremoto;
-
-    except
-      CloseFile(arq);
-      result := '';
-    end;
-  end;
-
 
 end.
 

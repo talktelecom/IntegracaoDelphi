@@ -2,6 +2,25 @@ unit UGlobalAtendimento;
 
 interface
 
+uses  Windows,
+      SysUtils;
+
+{ function e procedures de uso global }
+
+// inicia variáveis e etc.
+procedure IniciaApp;
+
+// Le as configurações do ini dado
+function LeConfigIni(
+  const section,
+  key,
+  fileName: string;
+  size : Integer): string;
+
+// trace no file
+procedure Trace(const str: string);
+
+
 { Struct de comunicação com a DLL }
 type
 {
@@ -174,27 +193,75 @@ StChamada = record
   InfoAdicional5          : Array[0..1023] of Char;
 end;
 
+var
+  // Diretório do exe
+  strDirExe   : string;
+
 { Constantes }
 const
 
 { Versão deste projeto }
-VERSAO            = '2.0.5';
+VERSAO            = '2.0.6';
 
-TAM_IP_ORIGEM     = 80;
-TAM_DEPARTAMENTO  = 80;
-TAM_SENHA         = 30;
-TAM_IP_SERVIDOR   = 80;
+{ nome da dll de integracao }
+EPBX_INTEGRACAO   = 'EpbxIntegracao.dll';
 
-// Do arquivo de configuração / banco de dados
-IP_SERVIDOR  = '177.38.216.72';
+{ Nome do arquivo de log }
+AQUIVO_LOG        = 'Atendimento.log';
+
+{ configuraçào da aplicação }
+COFIG_INI         = 'Atendimento.ini';
 
 implementation
 
+procedure IniciaApp;
+begin
+  strDirExe := GetCurrentDir();
+end;
+
+// Le as configurações do ini dado
+function LeConfigIni(const section, key, fileName: string; size : Integer): string;
+var
+  _section    : array [0..80] of char;
+  _key        : array [0..80] of char;
+  _fileName   : array [0..255] of char;
+  _rtBuffer   : array [0..255] of char;
+  _default    : array [0..1] of char;
+Begin
+  try
+
+    StrPCopy(_section, section);
+    StrPCopy(_key, key);
+    StrPCopy(_fileName, fileName);
+    StrPCopy(_default, '*');
+
+    GetPrivateProfileString(
+      _section,
+      _key,
+      _default,
+      _rtBuffer,
+      size,
+      _fileName);
+    Result := _rtBuffer;
+  except
+    on E : Exception do
+      Trace(E.ClassName + ' error raised, with message : ' + E.Message);
+  end;
+End;
+
+// Trace no arquivo TalkIntegracao.log
+procedure Trace(const str: string);
+var
+  myFile : TextFile;
+begin
+  AssignFile(myFile, AQUIVO_LOG);
+  Append(myFile);
+  WriteLn(myFile, str);
+
+  // Close the file for the last time
+  CloseFile(myFile);
+
+end;
+
 end.
-
-
-
-
-
-
 
