@@ -1,9 +1,9 @@
 object FormMain: TFormMain
-  Left = 834
-  Top = 342
+  Left = 913
+  Top = 865
+  Width = 476
+  Height = 300
   Caption = 'Atendimento'
-  ClientHeight = 261
-  ClientWidth = 443
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -91,7 +91,7 @@ object FormMain: TFormMain
     OnChange = txtNumeroChange
   end
   object btnDiscar: TButton
-    Left = 110
+    Left = 86
     Top = 134
     Width = 75
     Height = 25
@@ -120,9 +120,38 @@ object FormMain: TFormMain
   object chkInterna: TCheckBox
     Left = 17
     Top = 142
-    Width = 97
+    Width = 59
     Height = 17
     Caption = 'Interna'
     TabOrder = 6
+  end
+  object btnConsulta: TButton
+    Left = 166
+    Top = 134
+    Width = 75
+    Height = 25
+    Caption = 'Consultar'
+    Enabled = False
+    TabOrder = 7
+    OnClick = btnConsultaClick
+  end
+  object btnTransfere: TButton
+    Left = 246
+    Top = 134
+    Width = 75
+    Height = 25
+    Caption = 'Transfere'
+    Enabled = False
+    TabOrder = 8
+  end
+  object btnEspera: TButton
+    Left = 326
+    Top = 134
+    Width = 75
+    Height = 25
+    Caption = 'Espera'
+    Enabled = False
+    TabOrder = 9
+    OnClick = btnEsperaClick
   end
 end

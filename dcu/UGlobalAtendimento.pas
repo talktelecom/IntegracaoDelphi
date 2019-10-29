@@ -5,10 +5,15 @@ interface
 uses  Windows,
       SysUtils;
 
-{ function e procedures de uso global }
+{ procedures de uso global }
 
 // inicia variáveis e etc.
 procedure IniciaApp;
+
+// trace no file
+procedure Trace(const str: string);
+
+{ function de uso global }
 
 // Le as configurações do ini dado
 function LeConfigIni(
@@ -17,14 +22,10 @@ function LeConfigIni(
   fileName: string;
   size : Integer): string;
 
-// trace no file
-procedure Trace(const str: string);
-
-
 { Struct de comunicação com a DLL }
 type
 {
-  record para realizar o Logon
+  Dados para realizar o Logon
 
   Esta estrutura de dados será
   utilizada para enviar as
@@ -46,7 +47,7 @@ StLogar = record
 end;
 
 {
-  record resposta do logon
+  Resposta do logon
 
   Os dados do logon será dado
   por esta estrutura.
@@ -54,6 +55,32 @@ end;
   PS.: Consultar a DDL Referente
   ao tamanho dos dados string
 
+  Valores possíveis para a propriedade
+  Status de StLogado
+
+  Erro = -1,
+  Sucesso = 2,
+  IdEmUso = 3,
+  RamalInvalido = 4,
+  RamalEmUso = 5,
+  SenhaInvalida = 6,
+  ParametroInvalido = 7,
+  RamalNaoCadastrado = 8,
+  /// <summary>
+  /// Ocorre quando o softphone ou telefone sip está desconectado
+  /// </summary>
+  ContaSipNaoLogadaNoTelefone = 9,
+  SemRecursoVozDisponivel = 10,
+  ForaDaJornadaTrabalho = 11,
+  NotDocumented = 12,
+  ErroSistema = 13,
+  /// <summary>
+  /// Quando o arquivo com o intervalo é inválido
+  /// </summary>
+  IntervaloInvalido = 14,
+  ParametrosIncompletos = 15,
+  RamalGrupoInvalido = 16,
+  StatusGrupoInvalido = 17
 }
 StLogado = record
   Status                    : Integer;
@@ -87,37 +114,24 @@ StLogado = record
   RotasDiscagem             : Array[0..99] of Char;
   IdRamal                   : Array[0..19] of Char;
 end;
-{
-  Valores possíveis para a propriedade
-  Status de StLogado
 
-  Erro = -1,
-  Sucesso = 2,
-  IdEmUso = 3,
-  RamalInvalido = 4,
-  RamalEmUso = 5,
-  SenhaInvalida = 6,
-  ParametroInvalido = 7,
-  RamalNaoCadastrado = 8,
-  /// <summary>
-  /// Ocorre quando o softphone ou telefone sip está desconectado
-  /// </summary>
-  ContaSipNaoLogadaNoTelefone = 9,
-  SemRecursoVozDisponivel = 10,
-  ForaDaJornadaTrabalho = 11,
-  NotDocumented = 12,
-  ErroSistema = 13,
-  /// <summary>
-  /// Quando o arquivo com o intervalo é inválido
-  /// </summary>
-  IntervaloInvalido = 14,
-  ParametrosIncompletos = 15,
-  RamalGrupoInvalido = 16,
-  StatusGrupoInvalido = 17
+{
+  Resposta do logoff / quebra de conexão
+
+  Os dados do logoff será dado
+  por esta estrutura.
+
+  PS.: Consultar a DDL Referente
+  ao tamanho dos dados string
 }
 
+StDeslogado = record
+  Status                  : Integer;
+  Mensagem                : Array[0..255] of Char;
+end;
+
 {
-  record intervalos do ramal
+  Intervalos do ramal
 
   Intervalos permitidos para
   o ramal
@@ -125,7 +139,6 @@ end;
   PS.: Consultar a DDL Referente
   ao tamanho dos dados string
 }
-PStInfoIntervaloRamal = ^StInfoIntervaloRamal;
 StInfoIntervaloRamal = record
   RamalStatusDetalheId      : Integer;
   Produtivo                 : Integer;
@@ -133,17 +146,11 @@ StInfoIntervaloRamal = record
 end;
 
 {
-  record intervalo atual do ramal
+  Intervalo atual do ramal
 
   PS.: Consultar a DDL Referente
   ao tamanho dos dados string
-}
-StSetIntervaloRamal = record
-  Status                  : Integer;
-  RamalStatusDetalheId    : Integer;
-  Mensagem                : Array[0..255] of Char;
-end;
-{
+
   Valores possíveis para a propriedade
   Status de StSetIntervaloRamal
 
@@ -163,10 +170,16 @@ end;
   ErroSistema = -1,
   Sucesso = 0,
   Pendente = 1
+
 }
+StSetIntervaloRamal = record
+  Status                  : Integer;
+  RamalStatusDetalheId    : Integer;
+  Mensagem                : Array[0..255] of Char;
+end;
 
 {
-  record que representa uma chamada
+  Representa uma chamada
 
   PS.: Consultar a DDL Referente
   ao tamanho dos dados string
@@ -193,6 +206,24 @@ StChamada = record
   InfoAdicional5          : Array[0..1023] of Char;
 end;
 
+{
+  Status de retornos genéricos
+
+  Valores possíveis para a propriedade
+  Status
+
+  StRetornoSucesso = 2
+  StRetornoErro = 3
+  
+  PS.: Consultar a DDL Referente
+  ao tamanho dos dados string
+}
+StRetorno = record
+  Status                  : Integer;
+  Mensagem                : Array[0..255] of Char;
+end;
+
+
 var
   // Diretório do exe
   strDirExe   : string;
@@ -201,7 +232,7 @@ var
 const
 
 { Versão deste projeto }
-VERSAO            = '2.0.6';
+VERSAO            = '2.0.7';
 
 { nome da dll de integracao }
 EPBX_INTEGRACAO   = 'EpbxIntegracao.dll';
@@ -212,12 +243,34 @@ AQUIVO_LOG        = 'Atendimento.log';
 { configuraçào da aplicação }
 COFIG_INI         = 'Atendimento.ini';
 
+{ StSetIntervaloRamal Status }
+IntervaloSucesso  = 0;
+IntervaloPendente = 1;
+
 implementation
+
+{ procedures de uso global }
 
 procedure IniciaApp;
 begin
   strDirExe := GetCurrentDir();
 end;
+
+// Trace no arquivo TalkIntegracao.log
+procedure Trace(const str: string);
+var
+  myFile : TextFile;
+begin
+  AssignFile(myFile, AQUIVO_LOG);
+  Append(myFile);
+  WriteLn(myFile, str);
+
+  // Close the file for the last time
+  CloseFile(myFile);
+
+end;
+
+{ function de uso global }
 
 // Le as configurações do ini dado
 function LeConfigIni(const section, key, fileName: string; size : Integer): string;
@@ -248,20 +301,6 @@ Begin
       Trace(E.ClassName + ' error raised, with message : ' + E.Message);
   end;
 End;
-
-// Trace no arquivo TalkIntegracao.log
-procedure Trace(const str: string);
-var
-  myFile : TextFile;
-begin
-  AssignFile(myFile, AQUIVO_LOG);
-  Append(myFile);
-  WriteLn(myFile, str);
-
-  // Close the file for the last time
-  CloseFile(myFile);
-
-end;
 
 end.
 

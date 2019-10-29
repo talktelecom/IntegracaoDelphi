@@ -12,6 +12,7 @@ uses
   UAtendimento,
   Dialogs,
   SysUtils,
+  Messages,
   UGlobalAtendimento;
 
 type
@@ -30,6 +31,10 @@ TFormMain = class(TForm)
     txtSenha: TEdit;
     chkInterna: TCheckBox;
     lblErro: TLabel;
+    btnConsulta: TButton;
+    btnTransfere: TButton;
+    btnEspera: TButton;
+    procedure txtNumeroKeyPress(Sender: TObject; var Key: Char);
     procedure txtNumeroChange(Sender: TObject);
     procedure cboIntervaloChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -41,6 +46,8 @@ TFormMain = class(TForm)
     procedure setIntervaloById(id: integer);
     procedure setCboIntervalo;
     procedure enableLogon(valor: bool);
+    procedure btnEsperaClick(Sender: TObject);
+    procedure btnConsultaClick(Sender: TObject);
 private
   _thLogar: ThLogar;
 
@@ -56,8 +63,6 @@ var
   _atendimento : Atendimento;
 
 implementation
-
-uses StrUtils;
 
 { -----------------------------------------------------------------------------
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -95,15 +100,31 @@ begin
     FormMain.enableLogon(true);
   end
   else
-    FormMain.Caption := 'Atendimento - Erro no logon';
-    FormMain.btnLogar.Enabled := true;
+  begin
+    FormMain.Caption := 'Atendimento - Status ' + IntToStr(st.Status);
+    if(st.Mensagem[0] <> #0) then
+      FormMain.lblErro.Caption := 'Erro:' + st.Mensagem
+    else
+      FormMain.lblErro.Caption := 'Erro: Falha no logon!'
+  end;
+
+
+  FormMain.btnLogar.Enabled := true;
 end;
 
 {
   Resposta do Deslogar
 }
-procedure OnDeslogado(); cdecl; //stdcall;
+procedure OnDeslogado(param: Pointer); cdecl;
+var
+  st : StDeslogado;
 begin
+  FillChar( st, sizeof( StDeslogado ), #0 );
+  CopyMemory(@st, param, sizeof(StDeslogado));
+
+  if(st.Mensagem[0] <> #0) then
+    FormMain.lblErro.Caption := 'Erro:' + st.Mensagem;
+
   FormMain.Caption := 'Atendimento';
   FormMain.btnLogar.Caption := 'Logar';
   FormMain.btnLogar.Enabled := true;
@@ -134,6 +155,15 @@ var
 begin
   FillChar( st, sizeof( StSetIntervaloRamal ), #0 );
   CopyMemory(@st, param, sizeof(StSetIntervaloRamal));
+
+  if(st.Status = IntervaloPendente) then
+    exit;
+
+  if(st.Status <> IntervaloSucesso) then
+  begin
+    FormMain.lblErro.Caption := 'Erro para alterar o intervalo ' + IntToStr(st.Status);
+    exit;
+  end;
 
   {  TODO : Tratar o intervalo atual do ramal. }
   _atendimento.IntervaloAtual := st.RamalStatusDetalheId;
@@ -191,7 +221,7 @@ end;
 {
   Erro ao realizar a discagem
 }
-procedure onDiscaErro(param: String); cdecl;
+procedure OnDiscaErro(param: String); cdecl;
 begin
 
   {  TODO : Tratar onDiscaErro. }
@@ -228,7 +258,16 @@ begin
   {  TODO : Tratar a ligação atendida. }
   FormMain.lblAtendido.Caption := 'Atendido:' + st.Telefone;
   FormMain.btnDiscar.Caption := 'Desligar';
+  {
+    caso o consultado desligue, o ramal
+    irá receber a ligação como um novo atendimento
+  }
+  FormMain.btnConsulta.Caption := 'Consultar';
+
   FormMain.btnDiscar.Enabled := true;
+  FormMain.btnConsulta.Enabled := true;
+  FormMain.btnTransfere.Enabled := true;
+  FormMain.btnEspera.Enabled := true;
 end;
 
 {
@@ -270,6 +309,122 @@ begin
   FormMain.lblAtendido.Caption := 'Atendido:';
   FormMain.btnDiscar.Caption := 'Discar';
   FormMain.btnDiscar.Enabled := true;
+  FormMain.btnConsulta.Enabled := false;
+  FormMain.btnTransfere.Enabled := false;
+  FormMain.btnEspera.Enabled := false;
+end;
+
+{
+  Coloca a ligação em espera
+}
+procedure OnInicioEspera(param: Pointer); cdecl;
+var
+  st : StRetorno;
+begin
+  FillChar( st, sizeof( StRetorno ), #0 );
+  CopyMemory(@st, param, sizeof(StRetorno));
+
+  FormMain.btnEspera.Enabled := true;
+
+  if(st.Status <> _atendimento.StRetornoSucesso) then
+  begin
+    FormMain.lblErro.Caption := 'Erro ao colocar na espera ' + st.Mensagem;
+    exit;
+  end;
+
+  FormMain.btnEspera.Caption := 'Tira Espera';
+  FormMain.btnDiscar.Enabled := false;
+  FormMain.btnConsulta.Enabled := false;
+  FormMain.btnTransfere.Enabled := false;
+
+end;
+
+procedure OnTerminoEspera(param: Pointer); cdecl;
+var
+  st : StRetorno;
+begin
+  FillChar( st, sizeof( StRetorno ), #0 );
+  CopyMemory(@st, param, sizeof(StRetorno));
+
+  FormMain.btnEspera.Enabled := true;
+
+  if(st.Status <> _atendimento.StRetornoSucesso) then
+  begin
+    FormMain.lblErro.Caption := 'Erro ao tirar da espera ' + st.Mensagem;
+    exit;
+  end;
+
+  FormMain.btnEspera.Caption := 'Espera';
+  FormMain.btnDiscar.Enabled := true;
+  FormMain.btnConsulta.Enabled := true;
+  FormMain.btnTransfere.Enabled := true;
+
+end;
+
+procedure OnConsulta(param: Pointer); cdecl;
+var
+  st : StRetorno;
+begin
+  FillChar( st, sizeof( StRetorno ), #0 );
+  CopyMemory(@st, param, sizeof(StRetorno));
+
+  if(st.Status <> _atendimento.StRetornoSucesso) then
+  begin
+    FormMain.btnConsulta.Enabled := true;
+    FormMain.lblErro.Caption := 'Erro ao realizar a consulta ' + st.Mensagem;
+    exit;
+  end;
+end;
+
+procedure OnLiberarConsulta(param: Pointer); cdecl;
+var
+  st : StRetorno;
+begin
+  FillChar( st, sizeof( StRetorno ), #0 );
+  CopyMemory(@st, param, sizeof(StRetorno));
+
+  FormMain.btnConsulta.Enabled := true;
+
+  if(st.Status <> _atendimento.StRetornoSucesso) then
+  begin
+    FormMain.lblErro.Caption := 'Erro ao liberar a consulta ' + st.Mensagem;
+    exit;
+  end;
+
+  FormMain.btnDiscar.Enabled := true;
+  FormMain.btnConsulta.Enabled := true;
+  FormMain.btnTransfere.Enabled := true;
+  FormMain.btnEspera.Enabled := true;
+  FormMain.btnConsulta.Caption := 'Consultar';
+end;
+
+procedure OnConsultaChamada (param: Pointer); cdecl;
+var
+  st : StChamada;
+begin
+  FillChar( st, sizeof( StChamada ), #0 );
+  CopyMemory(@st, param, sizeof(StChamada));
+
+  FormMain.btnDiscar.Enabled := false;
+  FormMain.btnConsulta.Enabled := true;
+  FormMain.btnTransfere.Enabled := true;
+  FormMain.btnEspera.Enabled := false;
+  FormMain.btnConsulta.Caption := 'Libera Consulta';
+
+end;
+
+procedure OnConsultaAtendido (param: Pointer); cdecl;
+var
+  st : StChamada;
+begin
+  FillChar( st, sizeof( StChamada ), #0 );
+  CopyMemory(@st, param, sizeof(StChamada));
+
+  FormMain.btnDiscar.Enabled := false;
+  FormMain.btnConsulta.Enabled := true;
+  FormMain.btnTransfere.Enabled := true;
+  FormMain.btnEspera.Enabled := false;
+  FormMain.btnConsulta.Caption := 'Libera Consulta';
 end;
 
 { -----------------------------------------------------------------------------
@@ -287,6 +442,7 @@ end;
 }
 procedure TFormMain.btnLogarClick(Sender: TObject);
 begin
+  FormMain.lblErro.Caption := 'Erro:';
   if(btnLogar.Caption = 'Logar') then
     Logar( StrToInt(FormMain.txtRamal.Text), FormMain.txtSenha.Text)
   else
@@ -314,7 +470,7 @@ begin
   end;
   val(strIntervalo, intervalo, ret);
   if (ret = 0 and intervalo) then
-      _atendimento.AlterarIntervalo(intervalo);
+      _atendimento.AlterarIntervaloTipo(intervalo);
 end;
 
 {
@@ -363,7 +519,9 @@ procedure TFormMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   // Liberamos instancia atendimento
   if Assigned(_atendimento)then
+  begin
     _atendimento.Destroy;
+  end;
 end;
 
 {
@@ -376,6 +534,11 @@ var Numero: PChar;
 begin
   if(btnDiscar.Caption = 'Discar') then
   begin
+    if(Length(txtNumero.Text) < 1) then
+    begin
+      Application.messageBox('Digite um número para discar!','Aviso', mb_ok);
+      exit;
+    end;
     lblErro.Caption := '';
     Numero :=  @_numero;
     StrPCopy(_numero, txtNumero.Text);
@@ -402,6 +565,19 @@ begin
 end;
 
 {
+  Parse do numero a discar para aceitar apenas digitos
+}
+procedure TFormMain.txtNumeroKeyPress(Sender: TObject; var Key: Char);
+begin
+  if (Key in ['.', ','])
+     then if (pos(',', (Sender as TEdit).Text) = 0)
+             then Key := ','
+          else Key := #7
+  else if (not(Key in ['0'..'9', #8]))
+          then Key := #7;
+end;
+
+{
   Parse do ramal para aceitar apenas digitos
 }
 procedure TFormMain.txtRamalKeyPress(Sender: TObject; var Key: Char);
@@ -421,6 +597,50 @@ procedure TFormMain.btnDesligarClick(Sender: TObject);
 begin
       _atendimento.Desligar();
 end;
+
+{
+  Coloca / Retira a ligação na espera
+}
+procedure TFormMain.btnEsperaClick(Sender: TObject);
+begin
+  if(btnEspera.Caption = 'Espera') then
+    _atendimento.IniciarEspera
+  else
+    _atendimento.TerminarEspera;
+
+  lblErro.Caption := '';
+  btnEspera.Enabled := false;
+end;
+
+{
+  Realiza uma consulta externa / interna
+}
+procedure TFormMain.btnConsultaClick(Sender: TObject);
+var Numero: PChar;
+    _numero    : array [0..30] of char;
+    direcao: Integer;
+begin
+  if(btnConsulta.Caption = 'Consultar') then
+  begin
+    if(Length(txtNumero.Text) < 1) then
+    begin
+      Application.messageBox('Digite um número para consultar!','Aviso', mb_ok);
+      exit;
+    end;
+    lblErro.Caption := '';
+    Numero :=  @_numero;
+    StrPCopy(_numero, txtNumero.Text);
+    if(chkInterna.Checked) then
+      direcao := 2
+    else
+      direcao := 1;
+    btnConsulta.Enabled := false;
+    _atendimento.Consultar(Numero, direcao);
+  end
+  else
+    _atendimento.LiberarConsulta;
+end;
+
 
 { -----------------------------------------------------------------------------
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -446,7 +666,7 @@ begin
   // Cria uma nova instancia
   _atendimento := Atendimento.Create;
 
-  { Inicializar métodos e eventos }
+  { Atribuição das procedures aos respectivos eventos de callback }
   _atendimento.OnLogado             := @OnLogado;
   _atendimento.OnDeslogado          := @OnDeslogado;
   _atendimento.OnInfoIntervaloRamal := @OnInfoIntervaloRamal;
@@ -459,6 +679,14 @@ begin
   _atendimento.OnPathNomeDialogo    := @OnPathNomeDialogo;
   _atendimento.OnChamadaPerdida     := @OnChamadaPerdida;
   _atendimento.OnDesliga            := @OnDesliga;
+  _atendimento.OnDisca              := @OnDisca;
+  _atendimento.OnDiscaErro          := @OnDiscaErro;
+  _atendimento.OnInicioEspera       := @OnInicioEspera;
+  _atendimento.OnTerminoEspera      := @OnTerminoEspera;
+  _atendimento.OnConsulta           := @OnConsulta;
+  _atendimento.OnLiberarConsulta    := @OnLiberarConsulta;
+  _atendimento.OnConsultaChamada    := @OnConsultaChamada;
+  _atendimento.OnConsultaAtendido   := @OnConsultaAtendido;
 
   // Desabilita o botão de logar
   btnLogar.Enabled := false;
@@ -494,9 +722,9 @@ var
   posicao : Integer;
   str : string;
 begin
-  str := IntToStr(_atendimento.IntervaloAtual) + ' -';
+  str := IntToStr(_atendimento.IntervaloAtual);
   posicao := cboIntervalo.Items.IndexOf(str);
-  if( posicao > 0) then
+  if( posicao <> -1) then
     cboIntervalo.ItemIndex := posicao;
 end;
 
@@ -508,8 +736,9 @@ procedure TFormMain.enableLogon(valor: bool);
 begin
   cboIntervalo.Enabled := valor;
   txtNumero.Enabled := valor;
-  btnDiscar.Enabled := valor;
   chkInterna.Enabled := valor;
+
+  btnDiscar.Enabled := valor;
 end;
 
 end.
