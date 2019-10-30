@@ -143,6 +143,7 @@ object FormMain: TFormMain
     Caption = 'Transfere'
     Enabled = False
     TabOrder = 8
+    OnClick = btnTransfereClick
   end
   object btnEspera: TButton
     Left = 326

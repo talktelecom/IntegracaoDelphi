@@ -48,6 +48,7 @@ TFormMain = class(TForm)
     procedure enableLogon(valor: bool);
     procedure btnEsperaClick(Sender: TObject);
     procedure btnConsultaClick(Sender: TObject);
+    procedure btnTransfereClick(Sender: TObject);
 private
   _thLogar: ThLogar;
 
@@ -398,6 +399,22 @@ begin
   FormMain.btnConsulta.Caption := 'Consultar';
 end;
 
+procedure OnChamadaTransferida (param: Pointer); cdecl;
+var
+  st : StRetorno;
+begin
+  FillChar( st, sizeof( StRetorno ), #0 );
+  CopyMemory(@st, param, sizeof(StRetorno));
+
+  if(st.Status <> _atendimento.StRetornoSucesso) then
+  begin
+    FormMain.btnConsulta.Enabled := true;
+    FormMain.btnTransfere.Enabled := true;
+    FormMain.lblErro.Caption := 'Erro ao transferir a ligação ' + st.Mensagem;
+    exit;
+  end;
+end;
+
 procedure OnConsultaChamada (param: Pointer); cdecl;
 var
   st : StChamada;
@@ -483,6 +500,10 @@ var
   ramal : string;
   senha : string;
 begin
+
+  // Centraliza o form
+  Left := (Screen.Width - Width) div 2;
+  Top  := (Screen.Height - Height) Div 2;
 
   // Inicia a aplicação
   UGlobalAtendimento.IniciaApp;
@@ -603,6 +624,7 @@ end;
 }
 procedure TFormMain.btnEsperaClick(Sender: TObject);
 begin
+  lblErro.Caption := '';
   if(btnEspera.Caption = 'Espera') then
     _atendimento.IniciarEspera
   else
@@ -639,6 +661,40 @@ begin
   end
   else
     _atendimento.LiberarConsulta;
+end;
+
+procedure TFormMain.btnTransfereClick(Sender: TObject);
+var Numero: PChar;
+    _numero    : array [0..30] of char;
+    direcao: Integer;
+begin
+
+  // Está em consulta
+  if(btnConsulta.Caption = 'Libera Consulta') then
+  begin
+    lblErro.Caption := '';
+    btnTransfere.Enabled := false;
+    btnConsulta.Enabled := false;
+    _atendimento.Transferir();
+  end
+  else
+  begin
+    if(Length(txtNumero.Text) < 1) then
+    begin
+      Application.messageBox('Digite um número para transferir!','Aviso', mb_ok);
+      exit;
+    end;
+    lblErro.Caption := '';
+    Numero :=  @_numero;
+    StrPCopy(_numero, txtNumero.Text);
+    if(chkInterna.Checked) then
+      direcao := 2
+    else
+      direcao := 1;
+    btnTransfere.Enabled := false;
+    _atendimento.Transferir(Numero, direcao);
+  end;
+
 end;
 
 
@@ -685,6 +741,7 @@ begin
   _atendimento.OnTerminoEspera      := @OnTerminoEspera;
   _atendimento.OnConsulta           := @OnConsulta;
   _atendimento.OnLiberarConsulta    := @OnLiberarConsulta;
+  _atendimento.OnChamadaTransferida := @OnChamadaTransferida;
   _atendimento.OnConsultaChamada    := @OnConsultaChamada;
   _atendimento.OnConsultaAtendido   := @OnConsultaAtendido;
 

@@ -27,21 +27,29 @@ uses  Windows,
 procedure LogarInt (st: Pointer); stdcall;
 procedure LogarInt; external EPBX_INTEGRACAO name 'Logar';
 
-// Deslogar
-procedure DeslogarInt (); stdcall;
-procedure DeslogarInt; external EPBX_INTEGRACAO name 'Deslogar';
-
 // Alterar o intervalo
 procedure AlterarIntervaloTipoInt (id: Integer); cdecl;
 procedure AlterarIntervaloTipoInt; external EPBX_INTEGRACAO name 'AlterarIntervaloTipo';
 
-// Encerrar ligação
-procedure DesligarInt (); stdcall;
-procedure DesligarInt; external EPBX_INTEGRACAO name 'Desligar';
-
 // Efetuar ligação
 procedure DiscarInt (Numero: Pointer;  TipoDiscagem: Integer); cdecl;
 procedure DiscarInt; external EPBX_INTEGRACAO name 'Discar';
+
+// Realiza uma consulta
+procedure ConsultarInt (Numero: Pointer;  TipoDiscagem: Integer); cdecl;
+procedure ConsultarInt; external EPBX_INTEGRACAO name 'Consultar';
+
+// Realiza transferência ao número consultado ou para o número dado.
+procedure TransferirInt (Numero: Pointer;  TipoDiscagem: Integer); cdecl;
+procedure TransferirInt; external EPBX_INTEGRACAO name 'Transferir';
+
+// Deslogar
+procedure DeslogarInt (); stdcall;
+procedure DeslogarInt; external EPBX_INTEGRACAO name 'Deslogar';
+
+// Encerrar ligação
+procedure DesligarInt (); stdcall;
+procedure DesligarInt; external EPBX_INTEGRACAO name 'Desligar';
 
 // Coloca a ligação na espera
 procedure IniciarEsperaInt (); stdcall;
@@ -50,10 +58,6 @@ procedure IniciarEsperaInt; external EPBX_INTEGRACAO name 'IniciarEspera';
 // Tira a ligação da espera
 procedure TerminarEsperaInt (); stdcall;
 procedure TerminarEsperaInt; external EPBX_INTEGRACAO name 'TerminarEspera';
-
-// Realiza uma consulta
-procedure ConsultarInt (Numero: Pointer;  TipoDiscagem: Integer); cdecl;
-procedure ConsultarInt; external EPBX_INTEGRACAO name 'Consultar';
 
 // Libera a consulta realizada
 procedure LiberarConsultaInt (); stdcall;
@@ -126,6 +130,7 @@ Atendimento = class
     SetOnTerminoEspera      : TSetOnEventPointer;
     SetOnConsulta           : TSetOnEventPointer;
     SetOnLiberarConsulta    : TSetOnEventPointer;
+    SetOnChamadaTransferida : TSetOnEventPointer;
     SetOnConsultaChamada    : TSetOnEventPointer;
     SetOnConsultaAtendido   : TSetOnEventPointer;
 
@@ -149,6 +154,7 @@ Atendimento = class
     OnTerminoEspera       : TOnEventPointer;
     OnConsulta            : TOnEventPointer;
     OnLiberarConsulta     : TOnEventPointer;
+    OnChamadaTransferida  : TOnEventPointer;
     OnConsultaChamada     : TOnEventPointer;
     OnConsultaAtendido    : TOnEventPointer;
 
@@ -166,13 +172,15 @@ Atendimento = class
 
     { Métodos para integraçào com a DLL }
     function Logar(ramal: Integer; senha: String): bool;
-    function Deslogar(): bool;
     function AlterarIntervaloTipo(IdIntervalo: Integer): bool;
-    function Desligar(): bool;
     function Discar(Numero: PChar; TipoDiscagem: Integer): bool;
+    function Consultar(Numero: PChar; TipoDiscagem: Integer): bool;
+    function Transferir(Numero : PChar = nil; TipoDiscagem : Integer = 0): bool;
+
+    function Deslogar(): bool;
+    function Desligar(): bool;
     function IniciarEspera(): bool;
     function TerminarEspera(): bool;
-    function Consultar(Numero: PChar; TipoDiscagem: Integer): bool;
     function LiberarConsulta() : bool;
 end;
 
@@ -215,6 +223,7 @@ begin
   OnTerminoEspera       := nil;
   OnConsulta            := nil;
   OnLiberarConsulta     := nil;
+  OnChamadaTransferida  := nil;
   OnConsultaChamada     := nil;
   OnConsultaAtendido    := nil;
 
@@ -391,6 +400,14 @@ begin
       SetOnLiberarConsulta(@OnLiberarConsulta);
   end;
 
+  // SetOnChamadaTransferida
+  if Assigned(OnChamadaTransferida) then
+  begin
+    SetOnChamadaTransferida := GetProcAddress(HInstDll, 'SetOnChamadaTransferida');
+    if Assigned(SetOnChamadaTransferida) then
+      SetOnChamadaTransferida(@OnChamadaTransferida);
+  end;
+
   // SetOnConsultaChamada
   if Assigned(OnConsultaChamada) then
   begin
@@ -480,19 +497,6 @@ begin
 end;
 
 {
-  Logoff do ramal
-}
-function Atendimento.Deslogar() : bool;
-begin
-  Result := false;
-  if Assigned(@DeslogarInt) then
-  begin
-    DeslogarInt;
-    Result := true;
-  end;
-end;
-
-{
   Altera o intervalo do ramal
 }
 function Atendimento.AlterarIntervaloTipo(IdIntervalo: Integer) : bool;
@@ -506,19 +510,6 @@ begin
 end;
 
 {
-  Desliga a ligação atual
-}
-function Atendimento.Desligar() : bool;
-begin
-  Result := false;
-  if Assigned(@DesligarInt) then
-  begin
-    DesligarInt();
-    Result := true;
-  end;
-end;
-
-{
   Realiza uma chamada
 }
 function Atendimento.Discar(Numero: PChar;  TipoDiscagem: Integer) : bool;
@@ -527,6 +518,56 @@ begin
   if Assigned(@DiscarInt) then
   begin
     DiscarInt(Numero,  TipoDiscagem);
+    Result := true;
+  end;
+end;
+
+{
+  Realiza uma consulta
+}
+
+function Atendimento.Consultar(Numero: PChar;  TipoDiscagem: Integer) : bool;
+begin
+  Result := false;
+  if Assigned(@ConsultarInt) then
+  begin
+    ConsultarInt(Numero,  TipoDiscagem);
+    Result := true;
+  end;
+end;
+
+function Atendimento.Transferir(Numero: PChar; TipoDiscagem: Integer): bool;
+begin
+  Result := false;
+  if Assigned(@TransferirInt) then
+  begin
+    TransferirInt(Numero,  TipoDiscagem);
+    Result := true;
+  end;
+end;
+
+{
+  Logoff do ramal
+}
+function Atendimento.Deslogar() : bool;
+begin
+  Result := false;
+  if Assigned(@DeslogarInt) then
+  begin
+    DeslogarInt;
+    Result := true;
+  end;
+end;
+
+{
+  Desliga a ligação atual
+}
+function Atendimento.Desligar() : bool;
+begin
+  Result := false;
+  if Assigned(@DesligarInt) then
+  begin
+    DesligarInt();
     Result := true;
   end;
 end;
@@ -553,20 +594,6 @@ begin
   if Assigned(@TerminarEsperaInt) then
   begin
     TerminarEsperaInt;
-    Result := true;
-  end;
-end;
-
-{
-  Realiza uma consulta
-}
-
-function Atendimento.Consultar(Numero: PChar;  TipoDiscagem: Integer) : bool;
-begin
-  Result := false;
-  if Assigned(@ConsultarInt) then
-  begin
-    ConsultarInt(Numero,  TipoDiscagem);
     Result := true;
   end;
 end;

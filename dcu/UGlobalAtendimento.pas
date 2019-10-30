@@ -232,7 +232,7 @@ var
 const
 
 { Versão deste projeto }
-VERSAO            = '2.0.7';
+VERSAO            = '2.0.8';
 
 { nome da dll de integracao }
 EPBX_INTEGRACAO   = 'EpbxIntegracao.dll';
