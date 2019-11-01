@@ -10,8 +10,7 @@ uses  Windows,
 {
   Métodos da Dll
 
-  Aqui temos a declaração das ações
-  do Atendimento.
+  Aqui temos a declaração das ações do Atendimento.
 
   - Logar
   - Deslogar
@@ -71,9 +70,7 @@ type
 TOnEventPointer = procedure(param: Pointer) stdcall;
 
 {
-  Métodos para registrar
-  os métodos de callback
-  na dll
+  Assinatura para registrar os evento de callback na dll
 
   - SetOnLogado
   - SetOnDeslogado
