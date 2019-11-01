@@ -1,8 +1,8 @@
 # 1 - Integração CRM e CTIServer
 
-Projeto em Delphi que exemplifica como utilizar a biblioteca de integração do CRM e o CTIServer.
+	Projeto em Delphi que exemplifica como utilizar a biblioteca de integração do CRM e o CTIServer.
 
-Ferramentas de desenvolvimento utilizada neste projeto:
+	Ferramentas de desenvolvimento utilizada neste projeto:
 
 	Borland Delphi Professional
 	Versão 5.0 
@@ -11,58 +11,83 @@ Ferramentas de desenvolvimento utilizada neste projeto:
 
 # 2 - Ambiente de desenvolvimento
 
-1) Após baixar o projeto do git (https://github.com/talktelecom/IntegracaoDelphi.git), teremos os seguintes diretórios no root (IntegracaoDelphi)
-
-	- IntegracaoDelphi\dcu , neste diretório fica o código fonte do projeto
-	- IntegracaoDelphi\dpr , neste diretório fica o projeto do Delphi
+	# 2.1 - Baixar o projeto
 	
-2) No root (IntegracaoDelphi) criar o diretório bin.
+		Baixar o projeto do git (https://github.com/talktelecom/IntegracaoDelphi.git), 
+		teremos os seguintes diretórios no root (IntegracaoDelphi)
 
-	- IntegracaoDelphi\bin
+		- IntegracaoDelphi\dcu , neste diretório fica o código fonte do projeto
+		- IntegracaoDelphi\dpr , neste diretório fica o projeto do Delphi
 	
-3) Baixar os binários que está disponível no git (https://github.com/talktelecom/IntegracaoBinarios.git). Teremos a seguinte
-estrutura de diretórios
-
-	- IntegracaoBinarios\MSVC2017_32bit - Para SO 32 bits
-	- IntegracaoBinarios\MSVC2017_64bit - Para SO 64 bits
+	# 2.2 - Criar o diretório bin
 	
-4) Copiar todos o conteudo dos diretórios de acordo com o sistema operacional onde o CRM será utilizado para a pasta IntegracaoDelphi\bin.
+		No root (IntegracaoDelphi) criar o diretório bin.
 
-5) Copiar o arquivo de configuração atendimento.ini root (IntegracaoDelphi) para diretório IntegracaoDelphi\bin.
-
-6) Editar as configurações do atendimento.ini de acordo com as informações dada pelo suporte epbx.
-
-	[config]
-
-	* Endereço ip do CTI
+		- IntegracaoDelphi\bin
 	
-	servidor=xxx.xxx.xxx.xxx 
+	# 2.3 - Binários da dll
+
+		Baixar os binários que está disponível no git (https://github.com/talktelecom/IntegracaoBinarios.git). 
 	
-	* Ramal a ser utilizado no logon
+		Teremos a seguinte estrutura de diretórios
+
+		- IntegracaoBinarios\MSVC2017_32bit - Para SO 32 bits
+		- IntegracaoBinarios\MSVC2017_64bit - Para SO 64 bits
 	
-	ramal=1000
+	# 2.4 - Copia dos binários
 	
-	* senha do logon
+		Copiar todo o conteudo dos diretórios de acordo com o sistema operacional 
+		onde o CRM será utilizado para a pasta IntegracaoDelphi\bin.
+		* vide item 2.3 - Binários da dll
+
+	# 2.5 - Arquivo de configuração
 	
-	senha=1234
+		Copiar o arquivo de configuração atendimento.ini root (IntegracaoDelphi) para diretório IntegracaoDelphi\bin.
 
-
-7) Executar o arquivo vc_redist.x86.exe ou vc_redist.x64.exe para instalação das demais dependencies.
-
-8) Abrir o projeto (Atendimento.dpr) na IDE do Delphi que se encontra no diretório \IntegracaoDelphi\dpr.
-
-	* Lembrando que os fontes do projeto ficam no diretório IntegracaoDelphi\dcu
-
-9) Na IDE do Delphi, vá no menu Project->Options e na Aba Directories/Conditionais, verificar se:
-
-	Output directory: ..\bin
-	Unit output directory: ..\dcu
+	# 2.6 - Editar as configurações 
 	
-10) Compilar o projeto Ctrl + F9.
+		Editar o arquivo atendimento.ini de acordo com as informações dada pelo suporte epbx.
+
+		[config]
+
+		* Endereço ip do CTI
+	
+		servidor=xxx.xxx.xxx.xxx 
+	
+		* Ramal a ser utilizado no logon
+	
+		ramal=1000
+	
+		* senha do logon
+		
+		senha=1234
+
+
+	# 2.7 - Intalar as dependencias da dll
+	
+		Executar o arquivo vc_redist.x86.exe ou vc_redist.x64.exe para instalação das demais dependencies.
+
+	# 2.8 - Diretório do projeto Delphi
+	
+		Abrir o projeto (Atendimento.dpr) na IDE do Delphi que se encontra no diretório \IntegracaoDelphi\dpr.
+
+		* Lembrando que os fontes do projeto ficam no diretório IntegracaoDelphi\dcu
+
+	# 2.9 - Verificar opções do projeto
+
+		Na IDE do Delphi, vá no menu Project->Options e na Aba Directories/Conditionais, 
+		verificar se:
+
+			Output directory: ..\bin
+			Unit output directory: ..\dcu
+	
+	# 2.10 - Compilar o projeto
+
+		Para compilar o projeto, basta pressionar as teclas Ctrl + F9.
 
 # 3 - Biblioteca de integração
 
-1) A biblioteca principal de integração é a 'EpbxIntegracao.dll'
+	1) A biblioteca principal de integração é a 'EpbxIntegracao.dll'
 
 	* vide Ambiente de desenvolvimento item 3)
 	
