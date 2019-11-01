@@ -10,7 +10,7 @@ uses  Windows,
 {
   Métodos da Dll
 
-  Aqui temos a declaração das ações do Atendimento.
+  Aqui temos a declaração das referência as ações do Atendimento.
 
   - Logar
   - Deslogar
@@ -107,30 +107,10 @@ Atendimento = class
     StRetornoSucesso  : integer;
     StRetornoErro     : integer;
 
-    { Métodos para atribuir os eventos de callbackpara a DLL }
+    { Referência acessar os métodos da dll para atribuir as procedures de callback }
 
-    SetOnLogado             : TSetOnEventPointer;
-    SetOnDeslogado          : TSetOnEventPointer;
-    SetOnInfoIntervaloRamal : TSetOnEventPointer;
-    SetOnSetIntervaloRamal  : TSetOnEventPointer;
-    SetOnTempoStatus        : TSetOnEventPointer;
-    SetOnInfoCliente        : TSetOnEventPointer;
-    SetOnRingVirtual        : TSetOnEventPointer;
-    SetOnChamada            : TSetOnEventPointer;
-    SetOnAtendido           : TSetOnEventPointer;
-    SetOnPathNomeDialogo    : TSetOnEventPointer;
-    SetOnChamadaPerdida     : TSetOnEventPointer;
-    SetOnDesliga            : TSetOnEventPointer;
-    SetOnDisca              : TSetOnEventPointer;
-    SetOnDiscaErro          : TSetOnEventPointer;
-    SetOnInicioEspera       : TSetOnEventPointer;
-    SetOnTerminoEspera      : TSetOnEventPointer;
-    SetOnConsulta           : TSetOnEventPointer;
-    SetOnLiberarConsulta    : TSetOnEventPointer;
-    SetOnChamadaTransferida : TSetOnEventPointer;
-    SetOnConsultaChamada    : TSetOnEventPointer;
-    SetOnConsultaAtendido   : TSetOnEventPointer;
-
+    SetProcedureCallback    : TSetOnEventPointer;
+    
     { Eventos de callback Inicio }
 
     OnLogado              : TOnEventPointer;
@@ -256,169 +236,169 @@ begin
   // SetOnLogado
   if Assigned(OnLogado) then
   begin
-    SetOnLogado := GetProcAddress(HInstDll, 'SetOnLogado');
-    if Assigned(SetOnLogado) then
-      SetOnLogado(@OnLogado);
+    SetProcedureCallback:= GetProcAddress(HInstDll, 'SetOnLogado');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnLogado);
   end;
 
   // SetOnDeslogado
   if Assigned(OnDeslogado) then
   begin
-    SetOnDeslogado := GetProcAddress(HInstDll, 'SetOnDeslogado');
-    if Assigned(SetOnDeslogado) then
-      SetOnDeslogado(@OnDeslogado);
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnDeslogado');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnDeslogado);
   end;
 
   // SetOnInfoIntervaloRamal
   if Assigned(OnInfoIntervaloRamal) then
   begin
-    SetOnInfoIntervaloRamal := GetProcAddress(HInstDll, 'SetOnInfoIntervaloRamal');
-    if Assigned(SetOnInfoIntervaloRamal) then
-      SetOnInfoIntervaloRamal(@OnInfoIntervaloRamal);
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnInfoIntervaloRamal');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnInfoIntervaloRamal);
   end;
 
   // SetOnSetIntervaloRamal
   if Assigned(OnSetIntervaloRamal) then
   begin
-    SetOnSetIntervaloRamal := GetProcAddress(HInstDll, 'SetOnSetIntervaloRamal');
-    if Assigned(SetOnSetIntervaloRamal) then
-      SetOnSetIntervaloRamal(@OnSetIntervaloRamal);
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnSetIntervaloRamal');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnSetIntervaloRamal);
   end;
 
   // SetOnTempoStatus
   if Assigned(OnTempoStatus) then
   begin
-    SetOnTempoStatus := GetProcAddress(HInstDll, 'SetOnTempoStatus');
-    if Assigned(SetOnTempoStatus) then
-      SetOnTempoStatus(@OnTempoStatus);
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnTempoStatus');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnTempoStatus);
   end;
 
   // SetOnInfoCliente
   if Assigned(OnInfoCliente) then
   begin
-    SetOnInfoCliente := GetProcAddress(HInstDll, 'SetOnInfoCliente');
-    if Assigned(SetOnInfoCliente) then
-      SetOnInfoCliente(@OnInfoCliente);
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnInfoCliente');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnInfoCliente);
   end;
 
   // SetOnRingVirtual
   if Assigned(OnRingVirtual) then
   begin
-    SetOnRingVirtual := GetProcAddress(HInstDll, 'SetOnRingVirtual');
-    if Assigned(SetOnRingVirtual) then
-      SetOnRingVirtual(@OnRingVirtual);
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnRingVirtual');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnRingVirtual);
   end;
 
   // SetOnChamada
   if Assigned(OnChamada) then
   begin
-    SetOnChamada := GetProcAddress(HInstDll, 'SetOnChamada');
-    if Assigned(SetOnChamada) then
-      SetOnChamada(@OnChamada);
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnChamada');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnChamada);
   end;
 
   // SetOnAtendido
   if Assigned(OnAtendido) then
   begin
-    SetOnAtendido := GetProcAddress(HInstDll, 'SetOnAtendido');
-    if Assigned(SetOnAtendido) then
-      SetOnAtendido(@OnAtendido);
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnAtendido');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnAtendido);
   end;
 
   // SetOnPathNomeDialogo
   if Assigned(OnPathNomeDialogo) then
   begin
-    SetOnPathNomeDialogo := GetProcAddress(HInstDll, 'SetOnPathNomeDialogo');
-    if Assigned(SetOnPathNomeDialogo) then
-      SetOnPathNomeDialogo(@OnPathNomeDialogo);
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnPathNomeDialogo');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnPathNomeDialogo);
   end;
 
   // SetOnChamadaPerdida
   if Assigned(OnChamadaPerdida) then
   begin
-    SetOnChamadaPerdida := GetProcAddress(HInstDll, 'SetOnChamadaPerdida');
-    if Assigned(SetOnChamadaPerdida) then
-      SetOnChamadaPerdida(@OnChamadaPerdida);
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnChamadaPerdida');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnChamadaPerdida);
   end;
 
   // SetOnDesliga
   if Assigned(OnDesliga) then
   begin
-    SetOnDesliga := GetProcAddress(HInstDll, 'SetOnDesliga');
-    if Assigned(SetOnDesliga) then
-      SetOnDesliga(@OnDesliga);
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnDesliga');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnDesliga);
   end;
 
   // SetOnDisca
   if Assigned(OnDisca) then
   begin
-    SetOnDisca := GetProcAddress(HInstDll, 'SetOnDisca');
-    if Assigned(SetOnDisca) then
-      SetOnDisca(@OnDisca);
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnDisca');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnDisca);
   end;
 
   // SetOnDiscaErro
   if Assigned(OnDiscaErro) then
   begin
-    SetOnDiscaErro := GetProcAddress(HInstDll, 'SetOnDiscaErro');
-    if Assigned(SetOnDiscaErro) then
-      SetOnDiscaErro(@OnDiscaErro);
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnDiscaErro');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnDiscaErro);
   end;
 
   // SetOnInicioEspera
   if Assigned(OnInicioEspera) then
   begin
-    SetOnInicioEspera := GetProcAddress(HInstDll, 'SetOnInicioEspera');
-    if Assigned(SetOnInicioEspera) then
-      SetOnInicioEspera(@OnInicioEspera);
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnInicioEspera');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnInicioEspera);
   end;
 
   // SetOnTerminoEspera
   if Assigned(OnTerminoEspera) then
   begin
-    SetOnTerminoEspera := GetProcAddress(HInstDll, 'SetOnTerminoEspera');
-    if Assigned(SetOnTerminoEspera) then
-      SetOnTerminoEspera(@OnTerminoEspera);
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnTerminoEspera');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnTerminoEspera);
   end;
 
   // SetOnConsulta
   if Assigned(OnConsulta) then
   begin
-    SetOnConsulta := GetProcAddress(HInstDll, 'SetOnConsulta');
-    if Assigned(SetOnConsulta) then
-      SetOnConsulta(@OnConsulta);
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnConsulta');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnConsulta);
   end;
 
   // SetOnLiberarConsulta
   if Assigned(OnLiberarConsulta) then
   begin
-    SetOnLiberarConsulta := GetProcAddress(HInstDll, 'SetOnLiberarConsulta');
-    if Assigned(SetOnLiberarConsulta) then
-      SetOnLiberarConsulta(@OnLiberarConsulta);
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnLiberarConsulta');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnLiberarConsulta);
   end;
 
   // SetOnChamadaTransferida
   if Assigned(OnChamadaTransferida) then
   begin
-    SetOnChamadaTransferida := GetProcAddress(HInstDll, 'SetOnChamadaTransferida');
-    if Assigned(SetOnChamadaTransferida) then
-      SetOnChamadaTransferida(@OnChamadaTransferida);
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnChamadaTransferida');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnChamadaTransferida);
   end;
 
   // SetOnConsultaChamada
   if Assigned(OnConsultaChamada) then
   begin
-    SetOnConsultaChamada := GetProcAddress(HInstDll, 'SetOnConsultaChamada');
-    if Assigned(SetOnConsultaChamada) then
-      SetOnConsultaChamada(@OnConsultaChamada);
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnConsultaChamada');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnConsultaChamada);
   end;
 
   // SetOnConsultaAtendido
   if Assigned(OnConsultaAtendido) then
   begin
-    SetOnConsultaAtendido := GetProcAddress(HInstDll, 'SetOnConsultaAtendido');
-    if Assigned(SetOnConsultaAtendido) then
-      SetOnConsultaAtendido(@OnConsultaAtendido);
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnConsultaAtendido');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnConsultaAtendido);
   end;
 
 

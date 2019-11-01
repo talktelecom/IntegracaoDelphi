@@ -749,7 +749,7 @@ begin
   btnLogar.Enabled := false;
 
   { Realiza o logon através de thread }
-  _thLogar := ThLogar.Create (false, ramal, senha, _atendimento, Self);
+  _thLogar := ThLogar.Create (false, ramal, senha, _atendimento);
 end;
 
 {

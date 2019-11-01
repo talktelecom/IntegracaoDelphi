@@ -14,7 +14,6 @@ type
     private
       _ramal : Integer;
       _senha : String;
-      _formMain : TForm;
       _atendimento : Atendimento;
     protected
       procedure Execute; override;
@@ -22,8 +21,7 @@ type
       constructor Create( const CreateSuspended : boolean;
                             ramal : Integer;
                             senha : String;
-                            atendimento : Atendimento;
-                            formMain : TForm);
+                            atendimento : Atendimento);
   end;
 
 implementation
@@ -31,12 +29,10 @@ implementation
 constructor ThLogar.Create( const CreateSuspended : boolean;
                             ramal : Integer;
                             senha : String;
-                            atendimento : Atendimento;
-                            formMain : TForm);
+                            atendimento : Atendimento);
 begin
   _ramal := ramal;
   _senha := senha;
-  _formMain := formMain;
   _atendimento := atendimento;
   FreeOnTerminate := true;
   inherited Create(CreateSuspended);

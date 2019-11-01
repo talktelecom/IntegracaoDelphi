@@ -100,11 +100,13 @@ estrutura de diretórios
 			- 
 		
 		
-	# 5.3 - unit UAtendimento;
+	# 5.3 - unit UAtendimento
 		
 		Nesta unit temos a classe Atendimento a qual implementa as ações e eventos
 		para realizar a integração com o CTIServer através da dll "EpbxIntegracao.dll" e
 		esta classe será utilizada neste projeto pela unit UMain.
+		A sua principal finalidade é encapsular o acesso dos métodos da dll
+		para a unit UMain
 
 		# 5.3.1 - Declaração das referência aos métodos;
 		
@@ -175,18 +177,102 @@ estrutura de diretórios
 			# 5.3.4.1 - Propriedades
 			
 				* private
-				* HInstDll : THandle;
-				Referência a dll obtido através da api LoadLibrary()
+				* Referência a dll obtido através da api LoadLibrary()
+				HInstDll : THandle
 				
 				* public
 				
-				*IntervaloAtual    : integer;
-				Intervalo atual do ramal
+				* Intervalo atual do ramal
+				IntervaloAtual    : integer
 				
-				*StRetornoSucesso  : integer;
-				Indica sucesso no retorno da ação
+				* Indica sucesso no retorno da ação
+				StRetornoSucesso  : integer
 				
-				*StRetornoErro     : integer;
-				Indica erro no retorno da ação
-		
+				* Indica erro no retorno da ação
+				StRetornoErro     : integer
+				
+				* Referência acessar os métodos da dll para atribuir as procedures de callback.
+				SetProcedureCallback    : TSetOnEventPointer
+				
+				* Eventos de callback do type TOnEventPointer
+				OnLogado              : TOnEventPointer;
+				OnDeslogado           : TOnEventPointer;
+				OnInfoIntervaloRamal  : TOnEventPointer;
+				OnSetIntervaloRamal   : TOnEventPointer;
+				OnTempoStatus         : TOnEventPointer;
+				OnInfoCliente         : TOnEventPointer;
+				OnRingVirtual         : TOnEventPointer;
+				OnChamada             : TOnEventPointer;
+				OnAtendido            : TOnEventPointer;
+				OnPathNomeDialogo     : TOnEventPointer;
+				OnChamadaPerdida      : TOnEventPointer;
+				OnDesliga             : TOnEventPointer;
+				OnDisca               : TOnEventPointer;
+				OnDiscaErro           : TOnEventPointer;
+				OnInicioEspera        : TOnEventPointer;
+				OnTerminoEspera       : TOnEventPointer;
+				OnConsulta            : TOnEventPointer;
+				OnLiberarConsulta     : TOnEventPointer;
+				OnChamadaTransferida  : TOnEventPointer;
+				OnConsultaChamada     : TOnEventPointer;
+				OnConsultaAtendido    : TOnEventPointer;
+				
+			# 5.3.4.2 - Métodos
 			
+				* Construtor, chamado de forma implicita ao criar
+				* a instancia da classe atendimento, neste método
+				* ocorre a inicialização de algumas propriedades
+				* EVITE DE REALIZAR INICIALIZAÇÕES QUE POSSUI
+				* DELAY ALTO PARA INICIALIZAR. SE FOR PECISO,
+				* UTILIZE O MÉTODO Inicia
+				constructor Create
+				
+				* Carrega a instancia da classe com a dll
+				* e seta os eventos de callback com as
+				* procedures dadas pelas propriedades
+				* do type TOnEventPointer, exemplo [OnLogado]
+				function Inicia : Bool;
+				
+				* Finaliza a classe atendimento deslogando
+				* o ramal e saindo do loop de eventos do SO na dll
+				procedure Finaliza;
+				
+				* function para integraçào com a DLL
+				* estas function devem utilizar as
+				* referência as ações do Atendimento
+				* vide item # 5.3.1
+				
+				function Logar(ramal: Integer; senha: String): bool;
+				function AlterarIntervaloTipo(IdIntervalo: Integer): bool;
+				function Discar(Numero: PChar; TipoDiscagem: Integer): bool;
+				function Consultar(Numero: PChar; TipoDiscagem: Integer): bool;
+				function Transferir(Numero : PChar = nil; TipoDiscagem : Integer = 0): bool;
+
+				function Deslogar(): bool;
+				function Desligar(): bool;
+				function IniciarEspera(): bool;
+				function TerminarEspera(): bool;
+				function LiberarConsulta() : bool;
+				
+	# 5.4 - unit UMain;
+
+		Nesta unit iremos implementar o CRM que irá servir de exemplo
+		para criar os CRMs de forma customizada.
+		
+		O inicio da aplicação ocorre com o logon do ramal,
+		após esta ação o ramal está pronto para realizar as
+		ações junto ao CTIServer.
+		
+		procedure Logar(ramal : Integer; senha : String);
+		
+		Este método e chamado no evento onclick do botão Logar
+		e utilizamos a procedure
+		
+		TFormMain.Logar(ramal : Integer; senha : String);
+		
+		Esta procedure utilizamos a unit UThLogar
+		* vide item # 5.2 - unit UThLogar;
+		
+		As demais ações utilizaremos as function
+		para integrar com o CTIServer
+		* vide item # 5.3 - unit UAtendimento
