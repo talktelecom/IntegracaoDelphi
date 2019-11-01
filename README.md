@@ -34,13 +34,13 @@ estrutura de diretórios
 
 	[config]
 
-	# Endereço ip do CTI
+	* Endereço ip do CTI
 	servidor=xxx.xxx.xxx.xxx 
 	
-	# Ramal a ser utilizado no logon
+	* Ramal a ser utilizado no logon
 	ramal=1000
 	
-	# senha do logon
+	* senha do logon
 	senha=1234
 
 
