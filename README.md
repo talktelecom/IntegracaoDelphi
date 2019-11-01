@@ -34,7 +34,8 @@ estrutura de diretórios
 
 	[config]
 
-	** Endereço ip do CTI
+	* Endereço ip do CTI
+	
 	servidor=xxx.xxx.xxx.xxx 
 	
 	* Ramal a ser utilizado no logon
