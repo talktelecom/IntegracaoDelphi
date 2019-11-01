@@ -67,3 +67,6 @@ __recovery/
 
 # binarios EpbxIntegracao
 bin/
+
+#scripts
+*.bat
