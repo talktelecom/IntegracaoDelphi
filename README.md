@@ -116,9 +116,10 @@
 		
 		O construtor da classe recebe os seguintes parâmetros
 		
-			- CreateSuspended : boolean , 	false = a thread é iniciada imediatamente 
-											true a thread fica suspensa até que o método
-											Start seja chamado.
+			- CreateSuspended : boolean ,
+				se false a thread é iniciada imediatamente.
+				se true a thread fica suspensa até que o método
+				Start seja chamado.
 											
 	# 5.3 - unit UAtendimento.
 		
