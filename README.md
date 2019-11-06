@@ -31,8 +31,7 @@
 	
 		Teremos a seguinte estrutura de diretórios
 
-		- IntegracaoBinarios\MSVC2017_32bit - Para SO 32 bits
-		- IntegracaoBinarios\MSVC2017_64bit - Para SO 64 bits
+		- IntegracaoBinarios\MinGW_32_bit - Para SO 32 bits
 	
 	# 2.4 - Copia dos binários
 	
