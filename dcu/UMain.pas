@@ -444,6 +444,44 @@ begin
   FormMain.btnConsulta.Caption := 'Libera Consulta';
 end;
 
+procedure OnListaRamais (param: Pointer); cdecl;
+var
+  st : StRetorno;
+begin
+  FillChar( st, sizeof( StRetorno ), #0 );
+  CopyMemory(@st, param, sizeof(StRetorno));
+
+  if(st.Status <> _atendimento.StRetornoSucesso) then
+  begin
+    FormMain.lblErro.Caption := 'Erro ao listar os ramais ' + st.Mensagem;
+    exit;
+  end;
+
+  {
+
+    AO RECEBER ESTE EVENTO COM SUCESSO!!!
+
+    FIM DA LISTAGEM DOS RAMAIS DO CTI
+
+  }
+
+end;
+
+procedure OnInfoRamal (param: Pointer); cdecl;
+var
+  st : StRamal;
+begin
+  FillChar( st, sizeof( StRamal ), #0 );
+  CopyMemory(@st, param, sizeof(StRamal));
+
+  {
+
+    CRIAR A LISTA DOS RAMAIS!!!!
+
+  }
+
+end;
+
 { -----------------------------------------------------------------------------
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -744,6 +782,8 @@ begin
   _atendimento.OnChamadaTransferida := @OnChamadaTransferida;
   _atendimento.OnConsultaChamada    := @OnConsultaChamada;
   _atendimento.OnConsultaAtendido   := @OnConsultaAtendido;
+  _atendimento.OnListaRamais        := @OnListaRamais;
+  _atendimento.OnInfoRamal          := @OnInfoRamal;
 
   // Desabilita o botão de logar
   btnLogar.Enabled := false;

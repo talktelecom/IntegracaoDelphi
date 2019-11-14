@@ -181,15 +181,27 @@ end;
 {
   Representa uma chamada
 
+  Direcao :
+
+    Desconhecida = 0
+    ChamadaRealizada = 1
+    ChamadaRecebida = 2
+
+  TipoChamada :
+
+    Desconhecido = 0
+    LigacaoExterna = 1
+    LigacaoRamal = 2
+    LigacaoRamalPabx = 3
+    LigacaoAtiva = 4
+    RamalSendoConsultado = 5
+    DiscagemAtendeuRamalConsultando = 5
+
   PS.: Consultar a DDL Referente
   ao tamanho dos dados string
 }
 StChamada = record
-  { Desconhecida = 0, ChamadaRealizada = 1, ChamadaRecebida = 2 }
   Direcao                 : Integer;
-  { Desconhecido = 0, LigacaoExterna = 1, LigacaoRamal = 2,
-    LigacaoRamalPabx = 3, LigacaoAtiva = 4, RamalSendoConsultado = 5,
-    DiscagemAtendeuRamalConsultando = 5}
   TipoChamada             : Integer;
   CodigoCampanha          : Integer;
   CanalPa                 : Array[0..19] of Char;
@@ -223,6 +235,29 @@ StRetorno = record
   Mensagem                : Array[0..255] of Char;
 end;
 
+{
+  Informações dos ramais
+
+  Tipo :
+
+    RamalGrupo = 0
+    Ramal = 1
+    RamalFax = 2
+    RamalUra = 3
+    RamalPabx = 4
+}
+StRamal = record
+  Tipo                  : Integer;
+  Pa                    : Integer;
+  Ramal                 : Integer;
+  StatusRamal           : Integer;
+  Intervalo             : Integer;
+  RamaisLogados         : Integer;
+  Rota                  : Integer;
+  Nome                  : Array[0..99] of Char;
+  Departamento          : Array[0..79] of Char;
+  RamalTransferir       : Array[0..19] of Char;
+end;
 
 var
   // Diretório do exe
@@ -232,16 +267,22 @@ var
 const
 
 { Versão deste projeto }
-VERSAO            = '2.0.8';
+VERSAO            = '2.0.9';
 
 { nome da dll de integracao }
 EPBX_INTEGRACAO   = 'EpbxIntegracao.dll';
+
+{ Diretorio do log a partir do diretorio root da aplicação }
+DIR_LOG           = 'Log';
 
 { Nome do arquivo de log }
 AQUIVO_LOG        = 'Atendimento.log';
 
 { configuraçào da aplicação }
 COFIG_INI         = 'Atendimento.ini';
+
+{ Tamanho máximo do arquivo de log }
+MAX_TAM_LOG       = 10000000;
 
 { StSetIntervaloRamal Status }
 IntervaloSucesso  = 0;
@@ -259,15 +300,42 @@ end;
 // Trace no arquivo TalkIntegracao.log
 procedure Trace(const str: string);
 var
-  myFile : TextFile;
+  handleFile : TextFile;
+  today : TDateTime;
+  dirExe,
+  fullFileName,
+  fileLog,
+  fileBac,
+  dataTime : string;
 begin
-  AssignFile(myFile, AQUIVO_LOG);
-  Append(myFile);
-  WriteLn(myFile, str);
+  today := Now;
+  dirExe := GetCurrentDir;
+  dataTime := Format('%s %s ',[DateToStr(today), TimeToStr(today)]);
+  fullFileName := Format('%s\%s\%s', [dirExe, DIR_LOG ,AQUIVO_LOG]);
 
-  // Close the file for the last time
-  CloseFile(myFile);
+  AssignFile(handleFile, fullFileName);
+  if(FileExists(fullFileName)) then
+    Append(handleFile)
+  else
+    ReWrite(handleFile);
 
+  if(FileSize(handleFile) > MAX_TAM_LOG) then
+  begin
+    fileBac := Format('%s\%s\_%s', [dirExe, DIR_LOG, AQUIVO_LOG]);
+    fileLog := Format('%s\%s\%s', [dirExe, DIR_LOG, AQUIVO_LOG]);
+    CloseFile(handleFile);
+    if RenameFile(fileLog, fileBac) = false then
+    begin
+      exit;
+    end;
+    AssignFile(handleFile, fullFileName);
+    if(FileExists(fullFileName)) then
+      Append(handleFile)
+    else
+      ReWrite(handleFile);
+  end;
+  WriteLn(handleFile, dataTime + str);
+  CloseFile(handleFile);
 end;
 
 { function de uso global }

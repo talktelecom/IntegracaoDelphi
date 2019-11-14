@@ -62,6 +62,10 @@ procedure TerminarEsperaInt; external EPBX_INTEGRACAO name 'TerminarEspera';
 procedure LiberarConsultaInt (); stdcall;
 procedure LiberarConsultaInt; external EPBX_INTEGRACAO name 'LiberarConsulta';
 
+// Lista os ramais do CTI e em caso de Ramal PA, o seu respectivo status
+procedure ListaRamaisInt (TipoRamal: Integer); cdecl;
+procedure ListaRamaisInt; external EPBX_INTEGRACAO name 'ListaRamais';
+
 {
   Assinatura dos Métodos de CallBack
 }
@@ -134,6 +138,8 @@ Atendimento = class
     OnChamadaTransferida  : TOnEventPointer;
     OnConsultaChamada     : TOnEventPointer;
     OnConsultaAtendido    : TOnEventPointer;
+    OnListaRamais         : TOnEventPointer;
+    OnInfoRamal           : TOnEventPointer;
 
     { Eventos de callback Fim }
 
@@ -148,11 +154,12 @@ Atendimento = class
     procedure Finaliza;
 
     { Métodos para integraçào com a DLL }
-    function Logar(ramal: Integer; senha: String): bool;
+    function Logar(ramal: Integer; senha: String; id: Integer = -1): bool;
     function AlterarIntervaloTipo(IdIntervalo: Integer): bool;
     function Discar(Numero: PChar; TipoDiscagem: Integer): bool;
     function Consultar(Numero: PChar; TipoDiscagem: Integer): bool;
     function Transferir(Numero : PChar = nil; TipoDiscagem : Integer = 0): bool;
+    function ListaRamais(TipoRamal: Integer) : bool;
 
     function Deslogar(): bool;
     function Desligar(): bool;
@@ -203,6 +210,8 @@ begin
   OnChamadaTransferida  := nil;
   OnConsultaChamada     := nil;
   OnConsultaAtendido    := nil;
+  OnListaRamais         := nil;
+  OnInfoRamal           := nil;
 
 end;
 
@@ -219,13 +228,16 @@ end;
   Seta os eventos de callback
 }
 function Atendimento.Inicia;
+var
+  erroStr : string;
 begin
   Result := true;
 
   // Carrega a dll
   HInstDll := LoadLibrary(EPBX_INTEGRACAO);
   if (HInstDll = 0) then begin
-    { TODO : Logar erro }
+    erroStr := format('Erro em LoadLibrary %s, erro %d', [EPBX_INTEGRACAO, GetLastError]);
+    Trace(erroStr);
     Result := false;
     exit;
   end;
@@ -238,7 +250,12 @@ begin
   begin
     SetProcedureCallback:= GetProcAddress(HInstDll, 'SetOnLogado');
     if Assigned(SetProcedureCallback) then
-      SetProcedureCallback(@OnLogado);
+      SetProcedureCallback(@OnLogado)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnLogado, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
   end;
 
   // SetOnDeslogado
@@ -246,7 +263,12 @@ begin
   begin
     SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnDeslogado');
     if Assigned(SetProcedureCallback) then
-      SetProcedureCallback(@OnDeslogado);
+      SetProcedureCallback(@OnDeslogado)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnDeslogado, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
   end;
 
   // SetOnInfoIntervaloRamal
@@ -254,7 +276,12 @@ begin
   begin
     SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnInfoIntervaloRamal');
     if Assigned(SetProcedureCallback) then
-      SetProcedureCallback(@OnInfoIntervaloRamal);
+      SetProcedureCallback(@OnInfoIntervaloRamal)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnInfoIntervaloRamal, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
   end;
 
   // SetOnSetIntervaloRamal
@@ -262,7 +289,12 @@ begin
   begin
     SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnSetIntervaloRamal');
     if Assigned(SetProcedureCallback) then
-      SetProcedureCallback(@OnSetIntervaloRamal);
+      SetProcedureCallback(@OnSetIntervaloRamal)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnSetIntervaloRamal, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
   end;
 
   // SetOnTempoStatus
@@ -270,7 +302,12 @@ begin
   begin
     SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnTempoStatus');
     if Assigned(SetProcedureCallback) then
-      SetProcedureCallback(@OnTempoStatus);
+      SetProcedureCallback(@OnTempoStatus)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnTempoStatus, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
   end;
 
   // SetOnInfoCliente
@@ -278,7 +315,12 @@ begin
   begin
     SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnInfoCliente');
     if Assigned(SetProcedureCallback) then
-      SetProcedureCallback(@OnInfoCliente);
+      SetProcedureCallback(@OnInfoCliente)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnInfoCliente, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
   end;
 
   // SetOnRingVirtual
@@ -286,7 +328,12 @@ begin
   begin
     SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnRingVirtual');
     if Assigned(SetProcedureCallback) then
-      SetProcedureCallback(@OnRingVirtual);
+      SetProcedureCallback(@OnRingVirtual)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnRingVirtual, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
   end;
 
   // SetOnChamada
@@ -294,7 +341,12 @@ begin
   begin
     SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnChamada');
     if Assigned(SetProcedureCallback) then
-      SetProcedureCallback(@OnChamada);
+      SetProcedureCallback(@OnChamada)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnChamada, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
   end;
 
   // SetOnAtendido
@@ -302,7 +354,12 @@ begin
   begin
     SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnAtendido');
     if Assigned(SetProcedureCallback) then
-      SetProcedureCallback(@OnAtendido);
+      SetProcedureCallback(@OnAtendido)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnAtendido, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
   end;
 
   // SetOnPathNomeDialogo
@@ -310,7 +367,12 @@ begin
   begin
     SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnPathNomeDialogo');
     if Assigned(SetProcedureCallback) then
-      SetProcedureCallback(@OnPathNomeDialogo);
+      SetProcedureCallback(@OnPathNomeDialogo)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnPathNomeDialogo, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
   end;
 
   // SetOnChamadaPerdida
@@ -318,7 +380,12 @@ begin
   begin
     SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnChamadaPerdida');
     if Assigned(SetProcedureCallback) then
-      SetProcedureCallback(@OnChamadaPerdida);
+      SetProcedureCallback(@OnChamadaPerdida)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnChamadaPerdida, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
   end;
 
   // SetOnDesliga
@@ -326,7 +393,12 @@ begin
   begin
     SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnDesliga');
     if Assigned(SetProcedureCallback) then
-      SetProcedureCallback(@OnDesliga);
+      SetProcedureCallback(@OnDesliga)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnDesliga, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
   end;
 
   // SetOnDisca
@@ -334,7 +406,12 @@ begin
   begin
     SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnDisca');
     if Assigned(SetProcedureCallback) then
-      SetProcedureCallback(@OnDisca);
+      SetProcedureCallback(@OnDisca)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnDisca, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
   end;
 
   // SetOnDiscaErro
@@ -342,7 +419,12 @@ begin
   begin
     SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnDiscaErro');
     if Assigned(SetProcedureCallback) then
-      SetProcedureCallback(@OnDiscaErro);
+      SetProcedureCallback(@OnDiscaErro)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnDiscaErro, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
   end;
 
   // SetOnInicioEspera
@@ -350,7 +432,12 @@ begin
   begin
     SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnInicioEspera');
     if Assigned(SetProcedureCallback) then
-      SetProcedureCallback(@OnInicioEspera);
+      SetProcedureCallback(@OnInicioEspera)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnInicioEspera, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
   end;
 
   // SetOnTerminoEspera
@@ -358,7 +445,12 @@ begin
   begin
     SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnTerminoEspera');
     if Assigned(SetProcedureCallback) then
-      SetProcedureCallback(@OnTerminoEspera);
+      SetProcedureCallback(@OnTerminoEspera)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnTerminoEspera, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
   end;
 
   // SetOnConsulta
@@ -366,7 +458,12 @@ begin
   begin
     SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnConsulta');
     if Assigned(SetProcedureCallback) then
-      SetProcedureCallback(@OnConsulta);
+      SetProcedureCallback(@OnConsulta)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnConsulta, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
   end;
 
   // SetOnLiberarConsulta
@@ -374,7 +471,12 @@ begin
   begin
     SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnLiberarConsulta');
     if Assigned(SetProcedureCallback) then
-      SetProcedureCallback(@OnLiberarConsulta);
+      SetProcedureCallback(@OnLiberarConsulta)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnLiberarConsulta, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
   end;
 
   // SetOnChamadaTransferida
@@ -382,7 +484,12 @@ begin
   begin
     SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnChamadaTransferida');
     if Assigned(SetProcedureCallback) then
-      SetProcedureCallback(@OnChamadaTransferida);
+      SetProcedureCallback(@OnChamadaTransferida)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnChamadaTransferida, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
   end;
 
   // SetOnConsultaChamada
@@ -390,7 +497,12 @@ begin
   begin
     SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnConsultaChamada');
     if Assigned(SetProcedureCallback) then
-      SetProcedureCallback(@OnConsultaChamada);
+      SetProcedureCallback(@OnConsultaChamada)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnConsultaChamada, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
   end;
 
   // SetOnConsultaAtendido
@@ -398,9 +510,39 @@ begin
   begin
     SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnConsultaAtendido');
     if Assigned(SetProcedureCallback) then
-      SetProcedureCallback(@OnConsultaAtendido);
+      SetProcedureCallback(@OnConsultaAtendido)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnConsultaAtendido, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
   end;
 
+  // SetOnListaRamais
+  if Assigned(OnListaRamais) then
+  begin
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnListaRamais');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnListaRamais)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnListaRamais, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
+  end;
+
+  // SetOnInfoRamal
+  if Assigned(OnInfoRamal) then
+  begin
+    SetProcedureCallback := GetProcAddress(HInstDll, 'SetOnInfoRamal');
+    if Assigned(SetProcedureCallback) then
+      SetProcedureCallback(@OnInfoRamal)
+    else
+    begin
+      erroStr := format('Erro em GetProcAddress SetOnInfoRamal, erro %d', [GetLastError]);
+      Trace(erroStr);
+    end;
+  end;
 
 end;
 
@@ -423,7 +565,7 @@ end;
 {
   Logon do ramal
 }
-function Atendimento.Logar(ramal: Integer; senha: String): bool;
+function Atendimento.Logar(ramal: Integer; senha: String; id: Integer): bool;
 var
   ret       : Boolean;
   stL       : StLogar;
@@ -455,14 +597,13 @@ begin
 
     ZeroMemory(@stL,SizeOf(StLogar));
 
-    stL.Id := 0;
+    stL.Id := id;
     stL.Porta := 44900;
     stL.IntervaloCustomizado := 1;
     stL.Ramal := ramal;
-    stL.RamalVirtual := ramal;
     stL.Senha := @_senha;
     stL.Servidor := @_servidor;
-
+    
     LogarInt(@stL);
 
     Result := true;
@@ -584,6 +725,19 @@ begin
   if Assigned(@LiberarConsultaInt) then
   begin
     LiberarConsultaInt;
+    Result := true;
+  end;
+end;
+
+{
+  Lista Ramais
+}
+function Atendimento.ListaRamais(TipoRamal: Integer) : bool;
+begin
+  Result := false;
+  if Assigned(@ListaRamaisInt) then
+  begin
+    ListaRamaisInt(TipoRamal);
     Result := true;
   end;
 end;
