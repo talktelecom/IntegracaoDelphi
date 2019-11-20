@@ -237,6 +237,8 @@
 				OnChamadaTransferida  : TOnEventPointer;
 				OnConsultaChamada     : TOnEventPointer;
 				OnConsultaAtendido    : TOnEventPointer;
+				OnListaRamais         : TOnEventPointer;
+				OnInfoRamal           : TOnEventPointer;
 				
 			# 5.3.4.2 - Métodos.
 			
@@ -268,6 +270,7 @@
 				function Discar(Numero: PChar; TipoDiscagem: Integer): bool;
 				function Consultar(Numero: PChar; TipoDiscagem: Integer): bool;
 				function Transferir(Numero : PChar = nil; TipoDiscagem : Integer = 0): bool;
+				function ListaRamais(TipoRamal: Integer) : bool;
 
 				function Deslogar(): bool;
 				function Desligar(): bool;
