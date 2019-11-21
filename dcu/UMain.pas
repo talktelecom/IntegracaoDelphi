@@ -52,7 +52,7 @@ TFormMain = class(TForm)
 private
   _thLogar: ThLogar;
 
-  procedure Logar(ramal : Integer; senha : String);
+  procedure Logar(ramal : Integer; senha : String;id: Integer = -1);
   procedure Deslogar();
 
 public
@@ -749,7 +749,7 @@ end;
   o mesmo ficará em loop para tratar
   os eventos da DLL e o SO.
 }
-procedure TFormMain.Logar(ramal : Integer; senha : String);
+procedure TFormMain.Logar(ramal: Integer; senha: String; id: Integer);
 begin
   // Liberamos instancia anterior
   // Lembre-se na DLL temos que
@@ -789,7 +789,7 @@ begin
   btnLogar.Enabled := false;
 
   { Realiza o logon através de thread }
-  _thLogar := ThLogar.Create (false, ramal, senha, _atendimento);
+  _thLogar := ThLogar.Create (false, ramal, senha, id, _atendimento);
 end;
 
 {
