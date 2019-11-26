@@ -245,13 +245,17 @@ end;
     RamalFax = 2
     RamalUra = 3
     RamalPabx = 4
+
+  StatusRamal :
+
+    Livre = 0
+    Ocupado = 1    
 }
 StRamal = record
   Tipo                  : Integer;
   Pa                    : Integer;
   Ramal                 : Integer;
   StatusRamal           : Integer;
-  Intervalo             : Integer;
   RamaisLogados         : Integer;
   Rota                  : Integer;
   Nome                  : Array[0..99] of Char;
@@ -267,7 +271,7 @@ var
 const
 
 { Versão deste projeto }
-VERSAO            = '2.0.10';
+VERSAO            = '2.0.11';
 
 { nome da dll de integracao }
 EPBX_INTEGRACAO   = 'EpbxIntegracao.dll';
